@@ -54,5 +54,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to the camera in order to post photos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Thish app needs access to the photo library in order to post images stored on your device.</string>
 </dict>
 </plist>

@@ -18,6 +18,8 @@ class PlaceListViewController: UIViewController {
     var places = [PlaceData]()
     var authUI: FUIAuth!
     var db: Firestore!
+    var storage: Storage!
+    var newImages = [UIImage]()
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -26,6 +28,7 @@ class PlaceListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         db = Firestore.firestore()
+        storage = Storage.storage()
         authUI = FUIAuth.defaultAuthUI()
         // You need to adopt a FUIDelegate protocol to receive callback
         authUI?.delegate = self
@@ -73,15 +76,9 @@ class PlaceListViewController: UIViewController {
             }
             self.places = []
             for document in querySnapshot!.documents {
-                let placeDocumentID = document.documentID
-                let docData = document.data()
-                let placeName = docData["placeName"] as! String? ?? ""
-                let address = docData["address"] as! String? ?? ""
-                let postingUserID = docData["postingUserID"] as! String? ?? ""
-                let latitude = docData["latitude"] as! CLLocationDegrees? ?? 0.0
-                let longitude = docData["longitude"] as! CLLocationDegrees? ?? 0.0
-                let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-                self.places.append(PlaceData(placeName: placeName, address: address, coordinate: coordinate, postingUserID: postingUserID, placeDocumentID: placeDocumentID))
+                let placeData = PlaceData(dictionary: document.data())
+                placeData.placeDocumentID = document.documentID
+                self.places.append(placeData)
             }
             self.tableView.reloadData()
         }
@@ -95,11 +92,8 @@ class PlaceListViewController: UIViewController {
             places[index].postingUserID = "unknown user"
         }
         
-        let latitude = places[index].coordinate.latitude
-        let longitude = places[index].coordinate.longitude
-        
         // Create the dictionary representing data we want to save
-        let dataToSave: [String: Any] = ["placeName": places[index].placeName, "address": places[index].address, "postingUserID": places[index].postingUserID, "latitude": latitude, "longitude": longitude]
+        let dataToSave: [String: Any] = places[index].dictionary
         
         // if we HAVE saved a record, we'll have an ID
         if places[index].placeDocumentID != "" {
@@ -109,6 +103,7 @@ class PlaceListViewController: UIViewController {
                     print("ERROR: updating document \(error.localizedDescription)")
                 } else {
                     print("Document updated with reference ID \(ref.documentID)")
+                    self.saveImages(placeDocumentID: self.places[index].placeDocumentID)
                 }
             }
         } else { // Otherwise we don't have a document ID so we need to create the ref ID and save a new document
@@ -119,8 +114,42 @@ class PlaceListViewController: UIViewController {
                 } else {
                     print("Document added with reference ID \(ref!.documentID)")
                     self.places[index].placeDocumentID = "\(ref!.documentID)"
+                    self.saveImages(placeDocumentID: self.places[index].placeDocumentID)
                 }
             }
+        }
+    }
+    
+    func saveImages(placeDocumentID: String) {
+        // imagesRef now pointsn to a bucket to hold all images for place named: "placeDocumentID"
+        let imagesRef = storage.reference().child(placeDocumentID)
+        
+        for image in newImages {
+            let imageName = NSUUID().uuidString+".jpg" // always creates a unique string in part based on time/date
+            // Convert image to type Data so it can be saved to Storage
+            guard let imageData = UIImageJPEGRepresentation(image, 0.8) else {
+                print("ERROR creating imageData from JPEGRepresentation")
+                return
+            }
+            // Create a ref to the file you want to upload
+            let uploadedImageRef = imagesRef.child(imageName)
+            let uploadTask = uploadedImageRef.putData(imageData, metadata: nil, completion: { (metadata, error) in
+                guard error == nil else {
+                    print("ERROR: \(error!.localizedDescription)")
+                    return
+                }
+                let downloadURL = metadata!.downloadURL
+                print("%%% successfully uploaded - the downloadURL is \(downloadURL)")
+                
+                let postingUserID = Auth.auth().currentUser?.email ?? ""
+                self.db.collection("places").document(placeDocumentID).collection("images").document(imageName).setData(["postingUserID": postingUserID]) { (error) in
+                    if let error = error {
+                        print("ERROR: adding document \(error.localizedDescription)")
+                    } else {
+                        print("Document added for place \(placeDocumentID) and image \(imageName)")
+                    }
+                }
+            })
         }
     }
     
@@ -138,6 +167,7 @@ class PlaceListViewController: UIViewController {
     
     @IBAction func unwindFromDetail(segue: UIStoryboardSegue) {
         let source = segue.source as! DetailViewController
+        newImages = source.newImages
         if let selectedIndexPath = tableView.indexPathForSelectedRow {
             places[selectedIndexPath.row] = (source.placeData)!
             tableView.reloadRows(at: [selectedIndexPath], with: .automatic)
