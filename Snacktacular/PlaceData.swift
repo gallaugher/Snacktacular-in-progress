@@ -33,6 +33,10 @@ class PlaceData: NSObject, MKAnnotation {
         return coordinate.longitude
     }
     
+    var location: CLLocation {
+        return CLLocation(latitude: latitude, longitude: longitude)
+    }
+    
     var dictionary: [String: Any] {
         return ["placeName": placeName, "address": address, "postingUserID": postingUserID, "latitude": latitude, "longitude": longitude]
     }

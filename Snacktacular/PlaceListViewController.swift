@@ -11,15 +11,20 @@ import CoreLocation
 import Firebase
 import FirebaseAuthUI
 import FirebaseGoogleAuthUI
+import CoreLocation
+ 
 
 class PlaceListViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var sortSegmentControl: UISegmentedControl!
     var places = [PlaceData]()
     var authUI: FUIAuth!
     var db: Firestore!
     var storage: Storage!
     var newImages = [UIImage]()
+    var locationManager: CLLocationManager!
+    var currentLocation: CLLocation!
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -39,13 +44,13 @@ class PlaceListViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        loadData()
         checkForUpdates()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         signIn()
+        getLocation()
     }
     
     func signIn() {
@@ -64,14 +69,24 @@ class PlaceListViewController: UIViewController {
                 print("ERROR: adding the snapshot listener \(error!.localizedDescription)")
                 return
             }
-            self.loadData()
+            self.places = []
+            for document in querySnapshot!.documents {
+                let placeData = PlaceData(dictionary: document.data())
+                placeData.placeDocumentID = document.documentID
+                self.places.append(placeData)
+            }
+            if self.sortSegmentControl.selectedSegmentIndex == 0 {
+                self.tableView.reloadData()
+            } else {
+                self.sortBasedOnSegmentPressed()
+            }
         }
     }
     
     func loadData() {
         db.collection("places").getDocuments { (querySnapshot, error) in
             guard error == nil else {
-                print("ERROR: reading documents \(error!.localizedDescription)")
+                print("ERROR: adding the snapshot listener \(error!.localizedDescription)")
                 return
             }
             self.places = []
@@ -84,26 +99,26 @@ class PlaceListViewController: UIViewController {
         }
     }
     
-    func saveData(index: Int) {
+    func saveData(placeData: PlaceData) {
         // Grab the unique userID
         if let postingUserID = (authUI.auth?.currentUser?.email) {
-            places[index].postingUserID = postingUserID
+            placeData.postingUserID = postingUserID
         } else {
-            places[index].postingUserID = "unknown user"
+            placeData.postingUserID = "unknown user"
         }
         
         // Create the dictionary representing data we want to save
-        let dataToSave: [String: Any] = places[index].dictionary
+        let dataToSave: [String: Any] = placeData.dictionary
         
         // if we HAVE saved a record, we'll have an ID
-        if places[index].placeDocumentID != "" {
-            let ref = db.collection("places").document(places[index].placeDocumentID)
+        if placeData.placeDocumentID != "" {
+            let ref = db.collection("places").document(placeData.placeDocumentID)
             ref.setData(dataToSave) { (error) in
                 if let error = error {
                     print("ERROR: updating document \(error.localizedDescription)")
                 } else {
                     print("Document updated with reference ID \(ref.documentID)")
-                    self.saveImages(placeDocumentID: self.places[index].placeDocumentID)
+                    self.saveImages(placeDocumentID: placeData.placeDocumentID)
                 }
             }
         } else { // Otherwise we don't have a document ID so we need to create the ref ID and save a new document
@@ -113,8 +128,8 @@ class PlaceListViewController: UIViewController {
                     print("ERROR: adding document \(error.localizedDescription)")
                 } else {
                     print("Document added with reference ID \(ref!.documentID)")
-                    self.places[index].placeDocumentID = "\(ref!.documentID)"
-                    self.saveImages(placeDocumentID: self.places[index].placeDocumentID)
+                    placeData.placeDocumentID = "\(ref!.documentID)"
+                    self.saveImages(placeDocumentID: placeData.placeDocumentID)
                 }
             }
         }
@@ -153,6 +168,13 @@ class PlaceListViewController: UIViewController {
         }
     }
     
+    func showAlert(title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let alertAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertController.addAction(alertAction)
+        present(alertController, animated: true, completion: nil)
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowDetail" {
             let destination = segue.destination as! DetailViewController
@@ -165,20 +187,36 @@ class PlaceListViewController: UIViewController {
         }
     }
     
+    func closestSort() {
+        let sortedPlaces = places.sorted(by: {$0.location.distance(from: currentLocation) < $1.location.distance(from: currentLocation) } )
+        places = sortedPlaces
+        tableView.reloadData()
+    }
+    
+    func sortBasedOnSegmentPressed() {
+        switch sortSegmentControl.selectedSegmentIndex {
+        case 0: // unsorted
+            loadData()
+        case 1: // A-Z
+            let sortedPlaces = places.sorted(by: {$0.placeName < $1.placeName})
+            places = sortedPlaces
+            tableView.reloadData()
+        case 2: // closest
+            if currentLocation != nil {
+                closestSort()
+                getLocation()
+            } else {
+                getLocation()
+            }
+        default:
+            print("HEY, you shouldn't have gotten her. Check out the segmented control for an error.")
+        }
+    }
+    
     @IBAction func unwindFromDetail(segue: UIStoryboardSegue) {
         let source = segue.source as! DetailViewController
         newImages = source.newImages
-        if let selectedIndexPath = tableView.indexPathForSelectedRow {
-            places[selectedIndexPath.row] = (source.placeData)!
-            tableView.reloadRows(at: [selectedIndexPath], with: .automatic)
-            saveData(index: selectedIndexPath.row)
-        } else {
-            let newIndexPath = IndexPath(row: places.count, section: 0)
-            places.append((source.placeData)!)
-            tableView.insertRows(at: [newIndexPath], with: .bottom)
-            tableView.scrollToRow(at: newIndexPath, at: .bottom, animated: true)
-            saveData(index: newIndexPath.row)
-        }
+        saveData(placeData: source.placeData!)
     }
     
     @IBAction func signOutButtonPressed(_ sender: UIBarButtonItem) {
@@ -190,6 +228,11 @@ class PlaceListViewController: UIViewController {
             print("Couldn't sign out")
         }
     }
+    
+    @IBAction func sortSegmentPressed(_ sender: UISegmentedControl) {
+        sortBasedOnSegmentPressed()
+    }
+    
  }
 
 extension PlaceListViewController: UITableViewDelegate, UITableViewDataSource {
@@ -202,7 +245,13 @@ extension PlaceListViewController: UITableViewDelegate, UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.textLabel?.text = places[indexPath.row].placeName
         //cell.detailTextLabel?.text = places[indexPath.row].address
-        cell.detailTextLabel?.text = places[indexPath.row].postingUserID
+        //cell.detailTextLabel?.text = places[indexPath.row].postingUserID
+        var distanceInMiles = ""
+        if currentLocation != nil {
+            let distanceInMeters = self.places[indexPath.row].location.distance(from: currentLocation)
+            distanceInMiles = "Distance: " + String(format: "%.2f", (distanceInMeters * 0.00062137)) + " miles"
+        }
+        cell.detailTextLabel?.text = distanceInMiles
         return cell
     }
 }
@@ -241,3 +290,57 @@ extension PlaceListViewController: FUIAuthDelegate {
         return loginViewController
     }
 }
+ 
+ extension PlaceListViewController: CLLocationManagerDelegate {
+    
+    func getLocation(){
+        locationManager = CLLocationManager()
+        locationManager.delegate = self
+    }
+    
+    func handleLocationAuthorizationStatus(status: CLAuthorizationStatus) {
+        switch status {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .authorizedAlways, .authorizedWhenInUse:
+            locationManager.requestLocation()
+        case .denied:
+            showAlertToPrivacySettings(title: "User has not authorized location services", message: "Select 'Settings' below to open device settings and enable location services for this app.")
+        case .restricted:
+            showAlert(title: "Location services denied", message: "It may be that parental controls are restricting location use in this app")
+        }
+    }
+    
+    func showAlertToPrivacySettings(title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        guard let settingsURL = URL(string: UIApplicationOpenSettingsURLString) else {
+            print("Something went wrong getting the UIApplicationOpenSettingsURLString")
+            return
+        }
+        let settingsActions = UIAlertAction(title: "Settings", style: .default) { value in
+            UIApplication.shared.open(settingsURL, options: [:], completionHandler: nil)
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alertController.addAction(settingsActions)
+        alertController.addAction(cancelAction)
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        handleLocationAuthorizationStatus(status: status)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        currentLocation = locations.last
+        print("CURRENT LOCATION = \(currentLocation.coordinate.latitude) \(currentLocation.coordinate.longitude)")
+        if sortSegmentControl.selectedSegmentIndex == 2 {
+            closestSort()
+        } else {
+            tableView.reloadData()
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Failed to get user location.")
+    }
+ }
