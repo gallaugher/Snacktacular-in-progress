@@ -18,6 +18,8 @@ class DetailViewController: UIViewController {
     @IBOutlet weak var addressField: UITextField!
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var rateItButton: UIButton!
     
     var placeData: PlaceData?
     var locationManger: CLLocationManager!
@@ -26,8 +28,11 @@ class DetailViewController: UIViewController {
     var imagePicker = UIImagePickerController()
     var newImages = [UIImage]()
     var placeImages = [UIImage]()
+    var reviews = [Review]()
+    var newReviews = [Review]()
     var db: Firestore!
     var storage: Storage!
+    
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -38,10 +43,16 @@ class DetailViewController: UIViewController {
         imagePicker.delegate = self
         collectionView.delegate = self
         collectionView.dataSource = self
-        
+        tableView.delegate = self
+        tableView.dataSource = self
+
         db = Firestore.firestore()
         storage = Storage.storage()
         
+        reviews.append(Review(reviewHeadline: "Awesome!", reviewText: "Really liked the guac and chips!", rating: 5, reviewBy: "prof.gallaugher@gmail.com"))
+        reviews.append(Review(reviewHeadline: "Meh...", reviewText: "Burger bun was soggy. Should have been toasted", rating: 3, reviewBy: "john.gallaugher@gmail.com"))
+        reviews.append(Review(reviewHeadline: "Avoid it", reviewText: "I got sick :(", rating: 0, reviewBy: "grumpycat@gmail.com"))
+                reviews.append(Review(reviewHeadline: "Legendary. Try the concrete", reviewText: "I really like chocolate with peanut butter sauce. Their beer is also good.", rating: 4, reviewBy: "bonvivon@gmail.com"))
         // These three lines will dismiss the keyboard when one taps outside of a textField
         let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
         tap.cancelsTouchesInView = false
@@ -68,12 +79,14 @@ class DetailViewController: UIViewController {
     
     func getImageRerences(completion: @escaping ([String]) -> ()) {
         var imageReferences = [String]()
+        print("Getting Image References!")
         db.collection("places").document((placeData?.placeDocumentID)!).collection("images").getDocuments { (querySnapshot, error) in
             if error != nil {
                 print("ERROR: reading documents at \(error!.localizedDescription)")
             } else {
                 for document in querySnapshot!.documents {
                     imageReferences.append(document.documentID)
+                    print("Just got documentID: \(document.documentID)")
                 }
             }
             completion(imageReferences)
@@ -88,6 +101,7 @@ class DetailViewController: UIViewController {
             }
             for imageReference in imageReferences {
                 let imageReference = self.storage.reference().child(bucketRef+"/"+imageReference)
+                print("Loading imageReference for: \(imageReference)")
                 imageReference.getData(maxSize: 10 * 1024 * 1024) { data, error in
                     guard error == nil else {
                         print("An error occurred while rading data from file ref: \(imageReference), error \(error!.localizedDescription)")
@@ -107,12 +121,23 @@ class DetailViewController: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "ShowPhoto" {
-            let destination = segue.destination as! PhotoViewController
-            destination.photoImage = placeImages[collectionView.indexPathsForSelectedItems!.first!.row]
-        } else {
+        switch segue.identifier! {
+        case "ShowPhoto":
+        let destination = segue.destination as! PhotoViewController
+        destination.photoImage = placeImages[collectionView.indexPathsForSelectedItems!.first!.row]
+        case "unwindFromDetailWithSegue":
             placeData?.placeName = placeNameField.text!
             placeData?.address = addressField.text!
+        case "showRatingSegue":
+            print("*** showRatingSegue pressed!")
+            let destination = segue.destination as! ReviewTableViewController
+            let selectedReview = tableView.indexPathForSelectedRow!.row
+            destination.review = reviews[selectedReview]
+            destination.name = placeNameField.text
+            destination.address = addressField.text
+            tableView.deselectRow(at: tableView.indexPathForSelectedRow!, animated: true)
+        default:
+            print("DANG! This should not have happened! No case for the segue triggered!")
         }
     }
     
@@ -121,6 +146,14 @@ class DetailViewController: UIViewController {
         let alertAction = UIAlertAction(title: "OK", style: .default, handler: nil)
         alertController.addAction(alertAction)
         present(alertController, animated: true, completion: nil)
+    }
+    
+    @IBAction func rateItTouched(_ sender: UIButton) {
+        rateItButton.alpha = 0.5
+    }
+    
+    @IBAction func ratePressed(_ sender: UIButton) {
+        rateItButton.alpha = 1.0     
     }
     
     @IBAction func cancelButtonPressed(_ sender: Any) {
@@ -209,6 +242,7 @@ extension DetailViewController: CLLocationManagerDelegate {
                 self.placeData?.address = placemark?.thoroughfare ?? "unknown"
                 self.placeData?.coordinate = CLLocationCoordinate2D(latitude: currentLatitude, longitude: currentLongitude)
                 self.centerMap(mapLocation: (self.placeData?.coordinate)!, regionRadius: self.regionRadius)
+                
                 self.mapView.addAnnotation(self.placeData!)
                 self.mapView.selectAnnotation(self.placeData!, animated: true)
                 self.updateUserInterface()
@@ -313,5 +347,36 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDataSo
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCell", for: indexPath) as! PlaceImageCollectionViewCell
         cell.placeImage.image = placeImages[indexPath.row]
         return cell
+    }
+}
+
+extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return reviews.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ReviewCell", for: indexPath) as! ReviewTableViewCell
+//        cell.reviewerLabel.text = reviews[indexPath.row].reviewBy
+        cell.reviewHeadlineLabel.text = reviews[indexPath.row].reviewHeadline
+        cell.reviewTextLabel.text = reviews[indexPath.row].reviewText
+        if reviews[indexPath.row].rating > 0 {
+            for starNumber in 0..<reviews[indexPath.row].rating {
+                cell.starCollection[starNumber].image = UIImage(named: "star-filled")
+            }
+        }
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        let totalInserts = self.view.safeAreaInsets.top + self.view.safeAreaInsets.bottom
+        let safeHeight = self.view.frame.height - totalInserts
+        print("safeHeight = \(safeHeight)")
+        return 40
+//        if safeHeight >= 600 {
+//            return 46
+//        } else {
+//            return 35
+//        }
     }
 }

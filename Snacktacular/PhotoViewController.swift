@@ -12,6 +12,10 @@ class PhotoViewController: UIViewController {
     @IBOutlet weak var photoImageView: UIImageView!
     var photoImage: UIImage?
     
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         if let photoImage = photoImage {
