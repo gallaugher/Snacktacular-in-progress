@@ -1,9 +1,9 @@
 //
-//  DetailViewController.swift
+//  DetailTableViewController.swift
 //  Snacktacular
 //
-//  Created by John Gallaugher on 11/24/17.
-//  Copyright © 2017 John Gallaugher. All rights reserved.
+//  Created by John Gallaugher on 1/4/18.
+//  Copyright © 2018 John Gallaugher. All rights reserved.
 //
 
 import UIKit
@@ -12,13 +12,12 @@ import MapKit
 import GooglePlaces
 import Firebase
 
-class DetailViewController: UIViewController {
-
+class DetailTableViewController: UITableViewController {
+    
     @IBOutlet weak var placeNameField: UITextField!
     @IBOutlet weak var addressField: UITextField!
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var rateItButton: UIButton!
     
     var placeData: PlaceData?
@@ -33,38 +32,38 @@ class DetailViewController: UIViewController {
     var db: Firestore!
     var storage: Storage!
     
-    
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+  
         imagePicker.delegate = self
         collectionView.delegate = self
         collectionView.dataSource = self
-        tableView.delegate = self
-        tableView.dataSource = self
-
+        mapView.delegate = self
+        
         db = Firestore.firestore()
         storage = Storage.storage()
         
         reviews.append(Review(reviewHeadline: "Awesome!", reviewText: "Really liked the guac and chips!", rating: 5, reviewBy: "prof.gallaugher@gmail.com"))
+        
+        // Bogus reviews data
         reviews.append(Review(reviewHeadline: "Meh...", reviewText: "Burger bun was soggy. Should have been toasted", rating: 3, reviewBy: "john.gallaugher@gmail.com"))
         reviews.append(Review(reviewHeadline: "Avoid it", reviewText: "I got sick :(", rating: 0, reviewBy: "grumpycat@gmail.com"))
-                reviews.append(Review(reviewHeadline: "Legendary. Try the concrete", reviewText: "I really like chocolate with peanut butter sauce. Their beer is also good.", rating: 4, reviewBy: "bonvivon@gmail.com"))
-    
+        reviews.append(Review(reviewHeadline: "Legendary. Try the concrete", reviewText: "I really like chocolate with peanut butter sauce. Their beer is also good.", rating: 4, reviewBy: "bonvivon@gmail.com"))
+        
         // These three lines will dismiss the keyboard when one taps outside of a textField
         let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
         tap.cancelsTouchesInView = false
         self.view.addGestureRecognizer(tap)
-
-        mapView.delegate = self
-        if let placeData = placeData {
-//            centerMap(mapLocation: placeData.coordinate, regionRadius: regionRadius)
-//            mapView.removeAnnotations(mapView.annotations)
-//            mapView.addAnnotation(placeData)
-//            mapView.selectAnnotation(placeData, animated: true)
+        
+        if placeData != nil {
+            //            centerMap(mapLocation: placeData.coordinate, regionRadius: regionRadius)
+            //            mapView.removeAnnotations(mapView.annotations)
+            //            mapView.addAnnotation(placeData)
+            //            mapView.selectAnnotation(placeData, animated: true)
             updateUserInterface()
             loadImages()
         } else {
@@ -83,13 +82,18 @@ class DetailViewController: UIViewController {
         centerMap(mapLocation: (placeData?.coordinate)!, regionRadius: regionRadius)
         mapView.removeAnnotations(mapView.annotations)
         mapView.addAnnotation(self.placeData!)
-        //        mapView.selectAnnotation(self.placeData!, animated: true)
+//        mapView.selectAnnotation(self.placeData!, animated: true)
     }
     
     func getImageRerences(completion: @escaping ([String]) -> ()) {
         var imageReferences = [String]()
         print("Getting Image References!")
-        db.collection("places").document((placeData?.placeDocumentID)!).collection("images").getDocuments { (querySnapshot, error) in
+        guard (placeData?.placeDocumentID) != "" else {
+            print("No document ID - this must be a user's location")
+            completion(imageReferences)
+            return
+        }
+ db.collection("places").document((placeData?.placeDocumentID)!).collection("images").getDocuments { (querySnapshot, error) in
             if error != nil {
                 print("ERROR: reading documents at \(error!.localizedDescription)")
             } else {
@@ -132,8 +136,8 @@ class DetailViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.identifier! {
         case "ShowPhoto":
-        let destination = segue.destination as! PhotoViewController
-        destination.photoImage = placeImages[collectionView.indexPathsForSelectedItems!.first!.row]
+            let destination = segue.destination as! PhotoViewController
+            destination.photoImage = placeImages[collectionView.indexPathsForSelectedItems!.first!.row]
         case "unwindFromDetailWithSegue":
             placeData?.placeName = placeNameField.text!
             placeData?.address = addressField.text!
@@ -162,7 +166,7 @@ class DetailViewController: UIViewController {
     }
     
     @IBAction func ratePressed(_ sender: UIButton) {
-        rateItButton.alpha = 1.0     
+        rateItButton.alpha = 1.0
     }
     
     @IBAction func cancelButtonPressed(_ sender: Any) {
@@ -181,7 +185,7 @@ class DetailViewController: UIViewController {
     }
     
     @IBAction func cameraButtonPressed(_ sender: UIBarButtonItem) {
-       let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         let cameraAction = UIAlertAction(title: "Camera", style: .default) { (cameraAction) in
             self.accessCamera()
         }
@@ -196,7 +200,7 @@ class DetailViewController: UIViewController {
     }
 }
 
-extension DetailViewController: CLLocationManagerDelegate {
+extension DetailTableViewController: CLLocationManagerDelegate {
     
     func getLocation(){
         locationManger = CLLocationManager()
@@ -250,11 +254,11 @@ extension DetailViewController: CLLocationManagerDelegate {
                 let placemark = placemarks?.last
                 self.placeData?.placeName = (placemark?.name)!
                 self.placeData?.address = placemark?.thoroughfare ?? "unknown"
-//                self.placeData?.coordinate = CLLocationCoordinate2D(latitude: currentLatitude, longitude: currentLongitude)
+
 //                self.centerMap(mapLocation: (self.placeData?.coordinate)!, regionRadius: self.regionRadius)
-//
 //                self.mapView.addAnnotation(self.placeData!)
 //                self.mapView.selectAnnotation(self.placeData!, animated: true)
+
                 self.updateUserInterface()
             } else {
                 print("Error retrieving place. Error code: \(error!)")
@@ -267,37 +271,39 @@ extension DetailViewController: CLLocationManagerDelegate {
     }
 }
 
-extension DetailViewController: MKMapViewDelegate {
+extension DetailTableViewController: MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         let identifer = "Marker"
         // var view: MKPinAnnotationView
         var view: MKMarkerAnnotationView
-        //       if let dequedView = mapView.dequeueReusableAnnotationView(withIdentifier: identifer) as? MKPinAnnotationView {
+ //       if let dequedView = mapView.dequeueReusableAnnotationView(withIdentifier: identifer) as? MKPinAnnotationView {
         if let dequedView = mapView.dequeueReusableAnnotationView(withIdentifier: identifer) as? MKMarkerAnnotationView {
             dequedView.annotation = annotation
             view = dequedView
         } else {
             // view = MKPinAnnotationView(annotation: annotation, reuseIdentifier: identifer)
             view = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifer)
-            //            view.canShowCallout = true
-            //            view.rightCalloutAccessoryView = UIButton(type: .custom)
+//            view.canShowCallout = true
+//            view.rightCalloutAccessoryView = UIButton(type: .custom)
         }
         return view
     }
+    
 }
 
-extension DetailViewController: GMSAutocompleteViewControllerDelegate {
+extension DetailTableViewController: GMSAutocompleteViewControllerDelegate {
     
     // Handle the user's selection.
     func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
         placeData?.placeName = place.name
         placeData?.coordinate = place.coordinate
         placeData?.address = place.formattedAddress ?? "unknown"
-        centerMap(mapLocation: (placeData?.coordinate)!, regionRadius: regionRadius)
-        mapView.removeAnnotations(mapView.annotations)
-        mapView.addAnnotation(self.placeData!)
-        mapView.selectAnnotation(self.placeData!, animated: true)
+//        centerMap(mapLocation: (placeData?.coordinate)!, regionRadius: regionRadius)
+//        mapView.removeAnnotations(mapView.annotations)
+//        mapView.addAnnotation(self.placeData!)
+//        mapView.selectAnnotation(self.placeData!, animated: true)
+
         updateUserInterface()
         dismiss(animated: true, completion: nil)
     }
@@ -322,7 +328,7 @@ extension DetailViewController: GMSAutocompleteViewControllerDelegate {
     }
 }
 
-extension DetailViewController: UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+extension DetailTableViewController: UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         let selectedImage = info[UIImagePickerControllerOriginalImage] as! UIImage
@@ -350,7 +356,7 @@ extension DetailViewController: UINavigationControllerDelegate, UIImagePickerCon
     }
 }
 
-extension DetailViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+extension DetailTableViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return placeImages.count
     }
@@ -359,36 +365,5 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDataSo
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCell", for: indexPath) as! PlaceImageCollectionViewCell
         cell.placeImage.image = placeImages[indexPath.row]
         return cell
-    }
-}
-
-extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return reviews.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ReviewCell", for: indexPath) as! ReviewTableViewCell
-//        cell.reviewerLabel.text = reviews[indexPath.row].reviewBy
-        cell.reviewHeadlineLabel.text = reviews[indexPath.row].reviewHeadline
-        cell.reviewTextLabel.text = reviews[indexPath.row].reviewText
-        if reviews[indexPath.row].rating > 0 {
-            for starNumber in 0..<reviews[indexPath.row].rating {
-                cell.starCollection[starNumber].image = UIImage(named: "star-filled")
-            }
-        }
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let totalInserts = self.view.safeAreaInsets.top + self.view.safeAreaInsets.bottom
-        let safeHeight = self.view.frame.height - totalInserts
-        print("safeHeight = \(safeHeight)")
-        return 40
-//        if safeHeight >= 600 {
-//            return 46
-//        } else {
-//            return 35
-//        }
     }
 }

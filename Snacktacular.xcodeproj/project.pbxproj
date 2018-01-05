@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3C2B696D90291EFE254E4399 /* Pods_Snacktacular.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 12BDA8CA1D97D8A68088E065 /* Pods_Snacktacular.framework */; };
+		3E12F76B1FFEDD300075579B /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E12F76A1FFEDD300075579B /* MapKit.framework */; };
 		3E3DC1AB1FFDB3BC0041F5A8 /* ReviewTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E3DC1AA1FFDB3BC0041F5A8 /* ReviewTableViewController.swift */; };
 		3E56F5D11FFC23B400435DD5 /* Review.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E56F5D01FFC23B400435DD5 /* Review.swift */; };
 		3E56F5D31FFC23ED00435DD5 /* ReviewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E56F5D21FFC23ED00435DD5 /* ReviewTableViewCell.swift */; };
@@ -22,11 +23,13 @@
 		3E795C691FC88E9800258D81 /* PlaceListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C681FC88E9800258D81 /* PlaceListViewController.swift */; };
 		3E795C6B1FC8933700258D81 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C6A1FC8933700258D81 /* DetailViewController.swift */; };
 		3E795C6F1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C6E1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift */; };
+		3EBDBCAA1FFEA2F20070FA6C /* DetailTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBDBCA91FFEA2F20070FA6C /* DetailTableViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		12BDA8CA1D97D8A68088E065 /* Pods_Snacktacular.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Snacktacular.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B23663D52B76923B39C2794 /* Pods-Snacktacular.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Snacktacular.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Snacktacular/Pods-Snacktacular.debug.xcconfig"; sourceTree = "<group>"; };
+		3E12F76A1FFEDD300075579B /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		3E3DC1AA1FFDB3BC0041F5A8 /* ReviewTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewTableViewController.swift; sourceTree = "<group>"; };
 		3E56F5D01FFC23B400435DD5 /* Review.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Review.swift; sourceTree = "<group>"; };
 		3E56F5D21FFC23ED00435DD5 /* ReviewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewTableViewCell.swift; sourceTree = "<group>"; };
@@ -43,6 +46,7 @@
 		3E795C681FC88E9800258D81 /* PlaceListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceListViewController.swift; sourceTree = "<group>"; };
 		3E795C6A1FC8933700258D81 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		3E795C6E1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+preferredStatusBarStyle.swift"; sourceTree = "<group>"; };
+		3EBDBCA91FFEA2F20070FA6C /* DetailTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTableViewController.swift; sourceTree = "<group>"; };
 		E16D9590DA45D596D5A66145 /* Pods-Snacktacular.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Snacktacular.release.xcconfig"; path = "Pods/Target Support Files/Pods-Snacktacular/Pods-Snacktacular.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -51,6 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3E12F76B1FFEDD300075579B /* MapKit.framework in Frameworks */,
 				3C2B696D90291EFE254E4399 /* Pods_Snacktacular.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -85,6 +90,7 @@
 				3E795C6E1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift */,
 				3E795C681FC88E9800258D81 /* PlaceListViewController.swift */,
 				3E795C6A1FC8933700258D81 /* DetailViewController.swift */,
+				3EBDBCA91FFEA2F20070FA6C /* DetailTableViewController.swift */,
 				3E56F5D21FFC23ED00435DD5 /* ReviewTableViewCell.swift */,
 				3E6897FC1FD209B300541B68 /* PlaceImageCollectionViewCell.swift */,
 				3E6897FE1FD20DEB00541B68 /* PhotoViewController.swift */,
@@ -101,6 +107,7 @@
 		5CB801193D457EC55D0A2B5B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3E12F76A1FFEDD300075579B /* MapKit.framework */,
 				12BDA8CA1D97D8A68088E065 /* Pods_Snacktacular.framework */,
 			);
 			name = Frameworks;
@@ -151,6 +158,11 @@
 					3E795C501FC88D7500258D81 = {
 						CreatedOnToolsVersion = 9.1;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.Maps.iOS = {
+								enabled = 0;
+							};
+						};
 					};
 				};
 			};
@@ -274,6 +286,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3E795C691FC88E9800258D81 /* PlaceListViewController.swift in Sources */,
+				3EBDBCAA1FFEA2F20070FA6C /* DetailTableViewController.swift in Sources */,
 				3E56F5D11FFC23B400435DD5 /* Review.swift in Sources */,
 				3E795C551FC88D7500258D81 /* AppDelegate.swift in Sources */,
 				3E3DC1AB1FFDB3BC0041F5A8 /* ReviewTableViewController.swift in Sources */,

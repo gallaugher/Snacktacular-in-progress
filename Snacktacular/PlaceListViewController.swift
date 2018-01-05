@@ -178,6 +178,7 @@ class PlaceListViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowDetail" {
             let destination = segue.destination as! DetailViewController
+//            let destination = segue.destination as! DetailTableViewController
             let selectedRow = tableView.indexPathForSelectedRow!.row
             destination.placeData = places[selectedRow]
         } else {
@@ -215,6 +216,7 @@ class PlaceListViewController: UIViewController {
     
     @IBAction func unwindFromDetail(segue: UIStoryboardSegue) {
         let source = segue.source as! DetailViewController
+        //let source = segue.source as! DetailTableViewController
         newImages = source.newImages
         saveData(placeData: source.placeData!)
     }
@@ -344,3 +346,5 @@ extension PlaceListViewController: FUIAuthDelegate {
         print("Failed to get user location.")
     }
  }
+ 
+ 
