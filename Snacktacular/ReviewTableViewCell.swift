@@ -11,9 +11,7 @@ import UIKit
 class ReviewTableViewCell: UITableViewCell {
     
     @IBOutlet weak var reviewHeadlineLabel: UILabel!
-    // @IBOutlet weak var reviewerLabel: UILabel!    
+    // @IBOutlet weak var reviewerLabel: UILabel!
     @IBOutlet weak var reviewTextLabel: UILabel!
-
     @IBOutlet var starCollection: [UIImageView]!
-    
 }

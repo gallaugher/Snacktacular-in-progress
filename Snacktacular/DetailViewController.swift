@@ -14,25 +14,26 @@ import Firebase
 
 class DetailViewController: UIViewController {
 
+
     @IBOutlet weak var placeNameField: UITextField!
     @IBOutlet weak var addressField: UITextField!
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var rateItButton: UIButton!
+    @IBOutlet weak var saveBarButtonItem: UIBarButtonItem!
     
     var placeData: PlaceData?
     var locationManger: CLLocationManager!
     var currentLocation: CLLocation!
     var regionRadius = 1000.0 // 1 km
     var imagePicker = UIImagePickerController()
-    var newImages = [UIImage]()
+    var newImage = UIImage()
     var placeImages = [UIImage]()
     var reviews = [Review]()
     var newReviews = [Review]()
     var db: Firestore!
     var storage: Storage!
-    
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -48,6 +49,8 @@ class DetailViewController: UIViewController {
 
         db = Firestore.firestore()
         storage = Storage.storage()
+        // You need to adopt a FUIDelegate protocol to receive callback
+        // authUI?.delegate = self
         
         reviews.append(Review(reviewHeadline: "Awesome!", reviewText: "Really liked the guac and chips!", rating: 5, reviewBy: "prof.gallaugher@gmail.com"))
         reviews.append(Review(reviewHeadline: "Meh...", reviewText: "Burger bun was soggy. Should have been toasted", rating: 3, reviewBy: "john.gallaugher@gmail.com"))
@@ -124,6 +127,80 @@ class DetailViewController: UIViewController {
         }
     }
     
+    func saveData(placeData: PlaceData) {
+        // Note: exissting place record will always be saved or updated each time an image or review is added.
+        
+        let currentUser = Auth.auth().currentUser
+        
+        // Grab the unique userID
+        if let postingUserID = (currentUser?.email) {
+            placeData.postingUserID = postingUserID
+        } else {
+            placeData.postingUserID = "unknown user"
+        }
+        
+        // Create the dictionary representing data we want to save
+        let dataToSave: [String: Any] = placeData.dictionary
+        
+        // if we HAVE saved a record, we'll have an ID
+        if placeData.placeDocumentID != "" {
+            let ref = db.collection("places").document(placeData.placeDocumentID)
+            ref.setData(dataToSave) { (error) in
+                if let error = error {
+                    print("ERROR: updating document \(error.localizedDescription)")
+                } else {
+                    print("Document updated with reference ID \(ref.documentID)")
+                    self.saveImage(placeDocumentID: placeData.placeDocumentID)
+                }
+            }
+        } else { // Otherwise we don't have a document ID so we need to create the ref ID and save a new document
+            var ref: DocumentReference? = nil // Firestore will creat a new ID for us
+            ref = db.collection("places").addDocument(data: dataToSave) { (error) in
+                if let error = error {
+                    print("ERROR: adding document \(error.localizedDescription)")
+                } else {
+                    print("Document added with reference ID \(ref!.documentID)")
+                    placeData.placeDocumentID = "\(ref!.documentID)"
+                    self.saveBarButtonItem.title = "Update"
+                    self.saveImage(placeDocumentID: placeData.placeDocumentID)
+                }
+            }
+        }
+    }
+    
+    func saveImage(placeDocumentID: String) {
+        // imagesRef now points to a bucket to hold all images for place named: "placeDocumentID"
+        let imagesRef = storage.reference().child(placeDocumentID)
+        
+        let imageName = NSUUID().uuidString+".jpg" // always creates a unique string in part based on time/date
+        // Convert image to type Data so it can be saved to Storage
+        guard let imageData = UIImageJPEGRepresentation(newImage, 0.8) else {
+            print("ERROR creating imageData from JPEGRepresentation")
+            return
+        }
+        // Create a ref to the file you want to upload
+        let uploadedImageRef = imagesRef.child(imageName)
+        let uploadTask = uploadedImageRef.putData(imageData, metadata: nil, completion: { (metadata, error) in
+            guard error == nil else {
+                print("ERROR: \(error!.localizedDescription)")
+                return
+            }
+            let downloadURL = metadata!.downloadURL
+            print("%%% successfully uploaded - the downloadURL is \(downloadURL)")
+            
+            let postingUserID = Auth.auth().currentUser?.email ?? ""
+            self.db.collection("places").document(placeDocumentID).collection("images").document(imageName).setData(["postingUserID": postingUserID]) { (error) in
+                if let error = error {
+                    print("ERROR: adding document \(error.localizedDescription)")
+                } else {
+                    print("Document added for place \(placeDocumentID) and image \(imageName)")
+                }
+            }
+        })
+        
+    }
+    
+    
     func centerMap(mapLocation: CLLocationCoordinate2D, regionRadius: CLLocationDistance) {
         let region = MKCoordinateRegionMakeWithDistance(mapLocation, regionRadius, regionRadius)
         mapView.setRegion(region, animated: true)
@@ -134,10 +211,10 @@ class DetailViewController: UIViewController {
         case "ShowPhoto":
         let destination = segue.destination as! PhotoViewController
         destination.photoImage = placeImages[collectionView.indexPathsForSelectedItems!.first!.row]
-        case "unwindFromDetailWithSegue":
+        case "UnwindFromDetailWithSegue":
             placeData?.placeName = placeNameField.text!
             placeData?.address = addressField.text!
-        case "showRatingSegue":
+        case "ShowRatingSegue":
             print("*** showRatingSegue pressed!")
             let destination = segue.destination as! ReviewTableViewController
             let selectedReview = tableView.indexPathForSelectedRow!.row
@@ -157,7 +234,8 @@ class DetailViewController: UIViewController {
         present(alertController, animated: true, completion: nil)
     }
     
-    @IBAction func rateItTouched(_ sender: UIButton) {
+    
+    @IBAction func rateItTouchDown(_ sender: UIButton) {
         rateItButton.alpha = 0.5
     }
     
@@ -327,8 +405,11 @@ extension DetailViewController: UINavigationControllerDelegate, UIImagePickerCon
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         let selectedImage = info[UIImagePickerControllerOriginalImage] as! UIImage
         placeImages.insert(selectedImage, at: 0)
-        newImages.append(selectedImage)
-        dismiss(animated: true, completion: {self.collectionView.reloadData()})
+        newImage = selectedImage
+        dismiss(animated: true) {
+            self.saveData(placeData: self.placeData!)
+            self.collectionView.reloadData()
+        }
     }
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
@@ -385,10 +466,5 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
         let safeHeight = self.view.frame.height - totalInserts
         print("safeHeight = \(safeHeight)")
         return 40
-//        if safeHeight >= 600 {
-//            return 46
-//        } else {
-//            return 35
-//        }
     }
 }

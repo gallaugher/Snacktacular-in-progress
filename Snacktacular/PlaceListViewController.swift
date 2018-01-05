@@ -22,7 +22,6 @@ class PlaceListViewController: UIViewController {
     var authUI: FUIAuth!
     var db: Firestore!
     var storage: Storage!
-    var newImages = [UIImage]()
     var locationManager: CLLocationManager!
     var currentLocation: CLLocation!
     
@@ -118,7 +117,6 @@ class PlaceListViewController: UIViewController {
                     print("ERROR: updating document \(error.localizedDescription)")
                 } else {
                     print("Document updated with reference ID \(ref.documentID)")
-                    self.saveImages(placeDocumentID: placeData.placeDocumentID)
                 }
             }
         } else { // Otherwise we don't have a document ID so we need to create the ref ID and save a new document
@@ -129,42 +127,8 @@ class PlaceListViewController: UIViewController {
                 } else {
                     print("Document added with reference ID \(ref!.documentID)")
                     placeData.placeDocumentID = "\(ref!.documentID)"
-                    self.saveImages(placeDocumentID: placeData.placeDocumentID)
                 }
             }
-        }
-    }
-    
-    func saveImages(placeDocumentID: String) {
-        // imagesRef now pointsn to a bucket to hold all images for place named: "placeDocumentID"
-        let imagesRef = storage.reference().child(placeDocumentID)
-        
-        for image in newImages {
-            let imageName = NSUUID().uuidString+".jpg" // always creates a unique string in part based on time/date
-            // Convert image to type Data so it can be saved to Storage
-            guard let imageData = UIImageJPEGRepresentation(image, 0.8) else {
-                print("ERROR creating imageData from JPEGRepresentation")
-                return
-            }
-            // Create a ref to the file you want to upload
-            let uploadedImageRef = imagesRef.child(imageName)
-            let uploadTask = uploadedImageRef.putData(imageData, metadata: nil, completion: { (metadata, error) in
-                guard error == nil else {
-                    print("ERROR: \(error!.localizedDescription)")
-                    return
-                }
-                let downloadURL = metadata!.downloadURL
-                print("%%% successfully uploaded - the downloadURL is \(downloadURL)")
-                
-                let postingUserID = Auth.auth().currentUser?.email ?? ""
-                self.db.collection("places").document(placeDocumentID).collection("images").document(imageName).setData(["postingUserID": postingUserID]) { (error) in
-                    if let error = error {
-                        print("ERROR: adding document \(error.localizedDescription)")
-                    } else {
-                        print("Document added for place \(placeDocumentID) and image \(imageName)")
-                    }
-                }
-            })
         }
     }
     
@@ -217,7 +181,6 @@ class PlaceListViewController: UIViewController {
     @IBAction func unwindFromDetail(segue: UIStoryboardSegue) {
         let source = segue.source as! DetailViewController
         //let source = segue.source as! DetailTableViewController
-        newImages = source.newImages
         saveData(placeData: source.placeData!)
     }
     

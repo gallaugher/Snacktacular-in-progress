@@ -90,7 +90,6 @@
 				3E795C6E1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift */,
 				3E795C681FC88E9800258D81 /* PlaceListViewController.swift */,
 				3E795C6A1FC8933700258D81 /* DetailViewController.swift */,
-				3EBDBCA91FFEA2F20070FA6C /* DetailTableViewController.swift */,
 				3E56F5D21FFC23ED00435DD5 /* ReviewTableViewCell.swift */,
 				3E6897FC1FD209B300541B68 /* PlaceImageCollectionViewCell.swift */,
 				3E6897FE1FD20DEB00541B68 /* PhotoViewController.swift */,
@@ -100,6 +99,7 @@
 				3E795C5D1FC88D7500258D81 /* LaunchScreen.storyboard */,
 				3E795C601FC88D7500258D81 /* Info.plist */,
 				3E5F569B1FC8F0690004CA4F /* GoogleService-Info.plist */,
+				3EBDBCA91FFEA2F20070FA6C /* DetailTableViewController.swift */,
 			);
 			path = Snacktacular;
 			sourceTree = "<group>";
