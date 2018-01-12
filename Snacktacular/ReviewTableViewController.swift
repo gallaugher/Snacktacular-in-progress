@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Firebase
 
 class ReviewTableViewController: UITableViewController {
     @IBOutlet weak var nameLabel: UILabel!
@@ -23,6 +24,7 @@ class ReviewTableViewController: UITableViewController {
     var review: Review!
     var name: String!
     var address: String!
+    var currentUser = Auth.auth().currentUser
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -38,6 +40,10 @@ class ReviewTableViewController: UITableViewController {
         
         if (review) != nil {
             configureUserInterface()
+        } else {
+            // This is a new review
+            // Temporarily set reviewDocumentID to an empty string. We'll create an ID when saving the review in DeetailViewController
+            review = Review(reviewHeadline: "", reviewText: "", rating: 0, reviewBy: Auth.auth().currentUser?.email ?? "", reviewDocumentID: "")
         }
     }
     
@@ -54,7 +60,7 @@ class ReviewTableViewController: UITableViewController {
         }
         //TODO: - update below so instead of string, it compares against real UserID
         //If person viewing left the review, show save & cancel and get rid of the < button
-        if review.reviewBy == "john.gallaugher@gmail.com" {
+        if review.reviewBy == "\((currentUser?.email)!)" {
             saveBarButton.title = "Update"
             self.navigationItem.leftItemsSupplementBackButton = false
             addBorder(view: reviewContentView, alpha: 1.0)
@@ -85,6 +91,11 @@ class ReviewTableViewController: UITableViewController {
         view.layer.cornerRadius = 5.0
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        review.reviewHeadline = reviewTitleLabel.text!
+        review.reviewText = reviewContentView.text!
+    }
+    
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
         let isPrestingInAddMode = presentingViewController is UINavigationController
         if isPrestingInAddMode {
@@ -95,6 +106,7 @@ class ReviewTableViewController: UITableViewController {
     }
     
     @IBAction func starPressed(_ sender: UIButton) {
+        review.rating = Int(sender.tag)
         for button in starButtonCollection {
             if button.tag <= sender.tag {
                 button.setImage(UIImage(named: "star-filled"), for: .normal)
@@ -103,6 +115,7 @@ class ReviewTableViewController: UITableViewController {
             }
         }
     }
+    
     @IBAction func deleteReviewPressed(_ sender: UIButton) {
     }
 }

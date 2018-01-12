@@ -23,7 +23,7 @@
 		3E795C691FC88E9800258D81 /* PlaceListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C681FC88E9800258D81 /* PlaceListViewController.swift */; };
 		3E795C6B1FC8933700258D81 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C6A1FC8933700258D81 /* DetailViewController.swift */; };
 		3E795C6F1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C6E1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift */; };
-		3EBDBCAA1FFEA2F20070FA6C /* DetailTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBDBCA91FFEA2F20070FA6C /* DetailTableViewController.swift */; };
+		3EB7CA482001551000464B07 /* ActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB7CA472001551000464B07 /* ActivityIndicatorView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,7 +46,7 @@
 		3E795C681FC88E9800258D81 /* PlaceListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceListViewController.swift; sourceTree = "<group>"; };
 		3E795C6A1FC8933700258D81 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		3E795C6E1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+preferredStatusBarStyle.swift"; sourceTree = "<group>"; };
-		3EBDBCA91FFEA2F20070FA6C /* DetailTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTableViewController.swift; sourceTree = "<group>"; };
+		3EB7CA472001551000464B07 /* ActivityIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorView.swift; sourceTree = "<group>"; };
 		E16D9590DA45D596D5A66145 /* Pods-Snacktacular.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Snacktacular.release.xcconfig"; path = "Pods/Target Support Files/Pods-Snacktacular/Pods-Snacktacular.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -85,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				3E795C541FC88D7500258D81 /* AppDelegate.swift */,
+				3EB7CA472001551000464B07 /* ActivityIndicatorView.swift */,
 				3E795C661FC88D9B00258D81 /* PlaceData.swift */,
 				3E56F5D01FFC23B400435DD5 /* Review.swift */,
 				3E795C6E1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift */,
@@ -99,7 +100,6 @@
 				3E795C5D1FC88D7500258D81 /* LaunchScreen.storyboard */,
 				3E795C601FC88D7500258D81 /* Info.plist */,
 				3E5F569B1FC8F0690004CA4F /* GoogleService-Info.plist */,
-				3EBDBCA91FFEA2F20070FA6C /* DetailTableViewController.swift */,
 			);
 			path = Snacktacular;
 			sourceTree = "<group>";
@@ -286,9 +286,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				3E795C691FC88E9800258D81 /* PlaceListViewController.swift in Sources */,
-				3EBDBCAA1FFEA2F20070FA6C /* DetailTableViewController.swift in Sources */,
 				3E56F5D11FFC23B400435DD5 /* Review.swift in Sources */,
 				3E795C551FC88D7500258D81 /* AppDelegate.swift in Sources */,
+				3EB7CA482001551000464B07 /* ActivityIndicatorView.swift in Sources */,
 				3E3DC1AB1FFDB3BC0041F5A8 /* ReviewTableViewController.swift in Sources */,
 				3E6897FD1FD209B300541B68 /* PlaceImageCollectionViewCell.swift in Sources */,
 				3E795C671FC88D9B00258D81 /* PlaceData.swift in Sources */,

@@ -13,8 +13,6 @@ import GooglePlaces
 import Firebase
 
 class DetailViewController: UIViewController {
-
-
     @IBOutlet weak var placeNameField: UITextField!
     @IBOutlet weak var addressField: UITextField!
     @IBOutlet weak var mapView: MKMapView!
@@ -35,6 +33,8 @@ class DetailViewController: UIViewController {
     var db: Firestore!
     var storage: Storage!
     
+    var activityIndicator = UIActivityIndicatorView()
+    
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
@@ -46,16 +46,14 @@ class DetailViewController: UIViewController {
         collectionView.dataSource = self
         tableView.delegate = self
         tableView.dataSource = self
-
+        
         db = Firestore.firestore()
         storage = Storage.storage()
-        // You need to adopt a FUIDelegate protocol to receive callback
-        // authUI?.delegate = self
         
-        reviews.append(Review(reviewHeadline: "Awesome!", reviewText: "Really liked the guac and chips!", rating: 5, reviewBy: "prof.gallaugher@gmail.com"))
-        reviews.append(Review(reviewHeadline: "Meh...", reviewText: "Burger bun was soggy. Should have been toasted", rating: 3, reviewBy: "john.gallaugher@gmail.com"))
-        reviews.append(Review(reviewHeadline: "Avoid it", reviewText: "I got sick :(", rating: 0, reviewBy: "grumpycat@gmail.com"))
-                reviews.append(Review(reviewHeadline: "Legendary. Try the concrete", reviewText: "I really like chocolate with peanut butter sauce. Their beer is also good.", rating: 4, reviewBy: "bonvivon@gmail.com"))
+//        reviews.append(Review(reviewHeadline: "Awesome!", reviewText: "Really liked the guac and chips!", rating: 5, reviewBy: "prof.gallaugher@gmail.com"))
+//        reviews.append(Review(reviewHeadline: "Meh...", reviewText: "Burger bun was soggy. Should have been toasted", rating: 3, reviewBy: "john.gallaugher@gmail.com"))
+//        reviews.append(Review(reviewHeadline: "Avoid it", reviewText: "I got sick :(", rating: 0, reviewBy: "grumpycat@gmail.com"))
+//                reviews.append(Review(reviewHeadline: "Legendary. Try the concrete", reviewText: "I really like chocolate with peanut butter sauce. Their beer is also good.", rating: 4, reviewBy: "bonvivon@gmail.com"))
     
         // These three lines will dismiss the keyboard when one taps outside of a textField
         let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
@@ -70,6 +68,7 @@ class DetailViewController: UIViewController {
 //            mapView.selectAnnotation(placeData, animated: true)
             updateUserInterface()
             loadImages()
+            loadReviews()
         } else {
             placeData = PlaceData()
             getLocation()
@@ -109,6 +108,7 @@ class DetailViewController: UIViewController {
         getImageRerences { (imageReferences) in
             guard let bucketRef = self.placeData?.placeDocumentID else {
                 print("Couldn't read bucketRef for \(self.placeData!.placeDocumentID)")
+                self.startActivityIndicator()
                 return
             }
             for imageReference in imageReferences {
@@ -124,10 +124,29 @@ class DetailViewController: UIViewController {
                     self.collectionView.reloadData()
                 }
             }
+            self.stopActivityIndicator()
         }
     }
     
-    func saveData(placeData: PlaceData) {
+    func loadReviews() {
+        reviews = [] // Clear out any existing reviews
+        print("Getting Reviews!")
+        db.collection("places").document((placeData?.placeDocumentID)!).collection("reviews").getDocuments { (reviewQuerySnapshot, error) in
+            guard error == nil else {
+                print("ERROR: adding the snapshot listener \(error!.localizedDescription)")
+                return
+            }
+            self.reviews = []
+            for document in reviewQuerySnapshot!.documents {
+                let review = Review(dictionary: document.data())
+                review.reviewDocumentID = document.documentID
+                self.reviews.append(review)
+            }
+            self.tableView.reloadData()
+        }
+    }
+    
+    func saveData(placeData: PlaceData, review: Review?, image: UIImage?) {
         // Note: exissting place record will always be saved or updated each time an image or review is added.
         
         let currentUser = Auth.auth().currentUser
@@ -150,7 +169,12 @@ class DetailViewController: UIViewController {
                     print("ERROR: updating document \(error.localizedDescription)")
                 } else {
                     print("Document updated with reference ID \(ref.documentID)")
-                    self.saveImage(placeDocumentID: placeData.placeDocumentID)
+                    if let image = image {
+                        self.saveImage(placeDocumentID: placeData.placeDocumentID)
+                    }
+                    if let review = review {
+                        self.saveReview(review: review)
+                    }
                 }
             }
         } else { // Otherwise we don't have a document ID so we need to create the ref ID and save a new document
@@ -162,7 +186,12 @@ class DetailViewController: UIViewController {
                     print("Document added with reference ID \(ref!.documentID)")
                     placeData.placeDocumentID = "\(ref!.documentID)"
                     self.saveBarButtonItem.title = "Update"
-                    self.saveImage(placeDocumentID: placeData.placeDocumentID)
+                    if let image = image {
+                        self.saveImage(placeDocumentID: placeData.placeDocumentID)
+                    }
+                    if let review = review {
+                        self.saveReview(review: review)
+                    }
                 }
             }
         }
@@ -200,6 +229,39 @@ class DetailViewController: UIViewController {
         
     }
     
+    func saveReview(review: Review){
+        // Create the dictionary representing data we want to save
+        let reviewToSave: [String: Any] = review.dictionary
+        
+        // Just an error check. This should never happen
+        guard let placeData = placeData else {
+            print("*** ERROR: placeData was nil in saveReviewData")
+            return
+        }
+        
+        // if we HAVE saved a review, we must be updating and we'll have an ID
+        if review.reviewDocumentID != "" {
+            let ref = db.collection("places").document(placeData.placeDocumentID).collection("reviews").document(review.reviewDocumentID)
+            ref.setData(reviewToSave) { (error) in
+                if let error = error {
+                    print("ERROR: updating review \(error.localizedDescription)")
+                } else {
+                    print("Review updated with reviewDocumentID \(review.reviewDocumentID)")
+                }
+            }
+        } else { // Otherwise we don't have a document ID, so we must be adding a new review, so we need to create the ref ID and save a new review document
+            var ref: DocumentReference? = nil // Firestore will creat a new ID for us
+            ref = db.collection("places").document(placeData.placeDocumentID).collection("reviews").addDocument(data: reviewToSave) { (error) in
+                if let error = error {
+                    print("ERROR: adding document \(error.localizedDescription)")
+                } else {
+                    review.reviewDocumentID = "\(ref!.documentID)"
+                    print("Document added for place \(placeData.placeDocumentID) and review \(review.reviewDocumentID)")
+                }
+            }
+        }
+    }
+    
     
     func centerMap(mapLocation: CLLocationCoordinate2D, regionRadius: CLLocationDistance) {
         let region = MKCoordinateRegionMakeWithDistance(mapLocation, regionRadius, regionRadius)
@@ -221,9 +283,35 @@ class DetailViewController: UIViewController {
             destination.review = reviews[selectedReview]
             destination.name = placeNameField.text
             destination.address = addressField.text
-            tableView.deselectRow(at: tableView.indexPathForSelectedRow!, animated: true)
+        case "AddRatingSegue":
+        // do deselect here:
+            if let selectedIndexPath = tableView.indexPathForSelectedRow {
+                tableView.deselectRow(at: selectedIndexPath, animated: true)
+            }
         default:
             print("DANG! This should not have happened! No case for the segue triggered!")
+        }
+    }
+    
+    @IBAction func unwindFromRating(segue: UIStoryboardSegue) {
+        switch segue.identifier! {
+        case "saveUnwind":
+            let source = segue.source as! ReviewTableViewController
+            if let indexPath = tableView.indexPathForSelectedRow {
+                reviews[indexPath.row] = source.review
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+                saveData(placeData: placeData!, review: reviews[indexPath.row], image: nil)
+            } else {
+                let indexPath = IndexPath(row: reviews.count, section: 0)
+                reviews.append(source.review)
+                tableView.insertRows(at: [indexPath], with: .automatic)
+                tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+                saveData(placeData: placeData!, review: reviews[indexPath.row], image: nil)
+            }
+        case "deleteUnwind":
+            print("Delete here")
+        default:
+            print("ERROR: unidentified segue returning inside of unwindFromRating")
         }
     }
     
@@ -407,7 +495,7 @@ extension DetailViewController: UINavigationControllerDelegate, UIImagePickerCon
         placeImages.insert(selectedImage, at: 0)
         newImage = selectedImage
         dismiss(animated: true) {
-            self.saveData(placeData: self.placeData!)
+            self.saveData(placeData: self.placeData!, review: nil, image: self.newImage)
             self.collectionView.reloadData()
         }
     }
@@ -463,8 +551,23 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let totalInserts = self.view.safeAreaInsets.top + self.view.safeAreaInsets.bottom
-        let safeHeight = self.view.frame.height - totalInserts
-        print("safeHeight = \(safeHeight)")
         return 40
+    }
+}
+
+extension DetailViewController {
+    func startActivityIndicator() {
+        activityIndicator.center = self.view.center
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.activityIndicatorViewStyle = .whiteLarge
+        activityIndicator.color = UIColor.red
+        view.addSubview(activityIndicator)
+        activityIndicator.startAnimating()
+        UIApplication.shared.beginIgnoringInteractionEvents()
+    }
+    
+    func stopActivityIndicator() {
+        activityIndicator.stopAnimating()
+        UIApplication.shared.endIgnoringInteractionEvents()
     }
 }
