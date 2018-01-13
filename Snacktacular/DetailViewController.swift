@@ -27,7 +27,7 @@ class DetailViewController: UIViewController {
     var regionRadius = 1000.0 // 1 km
     var imagePicker = UIImagePickerController()
     var newImage = UIImage()
-    var placeImages = [UIImage]()
+    var photos = [Photo]()
     var reviews = [Review]()
     var newReviews = [Review]()
     var db: Firestore!
@@ -88,31 +88,34 @@ class DetailViewController: UIViewController {
         //        mapView.selectAnnotation(self.placeData!, animated: true)
     }
     
-    func getImageRerences(completion: @escaping ([String]) -> ()) {
-        var imageReferences = [String]()
-        print("Getting Image References!")
+    func getImageRerences(completion: @escaping ([Photo]) -> ()) {
+        print("Getting Photo Data!")
         db.collection("places").document((placeData?.placeDocumentID)!).collection("images").getDocuments { (querySnapshot, error) in
             if error != nil {
                 print("ERROR: reading documents at \(error!.localizedDescription)")
             } else {
                 for document in querySnapshot!.documents {
-                    imageReferences.append(document.documentID)
+                    var photo = Photo(dictionary: document.data())
+                    photo.imageDocumentID = document.documentID
+                    self.photos.append(photo)
+                    
+                    // imageReferences.append(document.documentID)
                     print("Just got documentID: \(document.documentID)")
                 }
             }
-            completion(imageReferences)
+            completion(self.photos)
         }
     }
     
     func loadImages() {
-        getImageRerences { (imageReferences) in
+        getImageRerences { (photos) in
             guard let bucketRef = self.placeData?.placeDocumentID else {
                 print("Couldn't read bucketRef for \(self.placeData!.placeDocumentID)")
                 self.startActivityIndicator()
                 return
             }
-            for imageReference in imageReferences {
-                let imageReference = self.storage.reference().child(bucketRef+"/"+imageReference)
+            for photo in photos {
+                let imageReference = self.storage.reference().child(bucketRef+"/"+photo.imageDocumentID)
                 print("Loading imageReference for: \(imageReference)")
                 imageReference.getData(maxSize: 10 * 1024 * 1024) { data, error in
                     guard error == nil else {
@@ -120,7 +123,7 @@ class DetailViewController: UIViewController {
                         return
                     }
                     let image = UIImage(data: data!)
-                    self.placeImages.append(image!)
+                    photo.image = image
                     self.collectionView.reloadData()
                 }
             }
@@ -146,7 +149,7 @@ class DetailViewController: UIViewController {
         }
     }
     
-    func saveData(placeData: PlaceData, review: Review?, image: UIImage?) {
+    func saveData(placeData: PlaceData, review: Review?, photo: Photo?) {
         // Note: exissting place record will always be saved or updated each time an image or review is added.
         
         let currentUser = Auth.auth().currentUser
@@ -169,8 +172,8 @@ class DetailViewController: UIViewController {
                     print("ERROR: updating document \(error.localizedDescription)")
                 } else {
                     print("Document updated with reference ID \(ref.documentID)")
-                    if let image = image {
-                        self.saveImage(placeDocumentID: placeData.placeDocumentID)
+                    if let photo = photo {
+                        self.savePhoto(placeDocumentID: placeData.placeDocumentID, photo: photo)
                     }
                     if let review = review {
                         self.saveReview(review: review)
@@ -186,8 +189,8 @@ class DetailViewController: UIViewController {
                     print("Document added with reference ID \(ref!.documentID)")
                     placeData.placeDocumentID = "\(ref!.documentID)"
                     self.saveBarButtonItem.title = "Update"
-                    if let image = image {
-                        self.saveImage(placeDocumentID: placeData.placeDocumentID)
+                    if let photo = photo {
+                        self.savePhoto(placeDocumentID: placeData.placeDocumentID, photo: photo)
                     }
                     if let review = review {
                         self.saveReview(review: review)
@@ -197,19 +200,26 @@ class DetailViewController: UIViewController {
         }
     }
     
-    func saveImage(placeDocumentID: String) {
-        // imagesRef now points to a bucket to hold all images for place named: "placeDocumentID"
-        let imagesRef = storage.reference().child(placeDocumentID)
+//    func saveImage(placeDocumentID: String) {
+    func savePhoto(placeDocumentID: String, photo: Photo) {
+        let photoName = NSUUID().uuidString+".jpg" // always creates a unique string in part based on time/date
+        photo.imageDocumentID = photoName
+        // Create the dictionary representing data we want to save
+        // let reviewToSave: [String: Any] = review.dictionary
+        let photoToSave: [String: Any] = photo.dictionary
         
-        let imageName = NSUUID().uuidString+".jpg" // always creates a unique string in part based on time/date
+        // imagesRef now points to a bucket to hold all images for place named: "placeDocumentID"
+        // let imagesRef = storage.reference().child(placeDocumentID)
+        let placeStorageRef = storage.reference().child(placeDocumentID)
+        
         // Convert image to type Data so it can be saved to Storage
-        guard let imageData = UIImageJPEGRepresentation(newImage, 0.8) else {
+        guard let photoData = UIImageJPEGRepresentation(newImage, 0.8) else {
             print("ERROR creating imageData from JPEGRepresentation")
             return
         }
         // Create a ref to the file you want to upload
-        let uploadedImageRef = imagesRef.child(imageName)
-        let uploadTask = uploadedImageRef.putData(imageData, metadata: nil, completion: { (metadata, error) in
+        let uploadedPhotoRef = placeStorageRef.child(photoName)
+        let uploadTask = uploadedPhotoRef.putData(photoData, metadata: nil, completion: { (metadata, error) in
             guard error == nil else {
                 print("ERROR: \(error!.localizedDescription)")
                 return
@@ -217,16 +227,18 @@ class DetailViewController: UIViewController {
             let downloadURL = metadata!.downloadURL
             print("%%% successfully uploaded - the downloadURL is \(downloadURL)")
             
-            let postingUserID = Auth.auth().currentUser?.email ?? ""
-            self.db.collection("places").document(placeDocumentID).collection("images").document(imageName).setData(["postingUserID": postingUserID]) { (error) in
+            let photoRef = self.db.collection("places").document(placeDocumentID).collection("images").document(photoName)
+            
+            photoRef.setData(photoToSave) { (error) in
                 if let error = error {
                     print("ERROR: adding document \(error.localizedDescription)")
                 } else {
-                    print("Document added for place \(placeDocumentID) and image \(imageName)")
+                    print("Document added for place \(placeDocumentID) and image \(photoName)")
+                    self.photos.append(photo)
                 }
+                self.collectionView.reloadData()
             }
         })
-        
     }
     
     func saveReview(review: Review){
@@ -262,6 +274,53 @@ class DetailViewController: UIViewController {
         }
     }
     
+    func deletePhoto(photo: Photo) {
+        guard let placeDocumentID = placeData?.placeDocumentID else {
+            print("*** deletePhoto error, invalid placeDocumentID \((placeData?.placeDocumentID)!)")
+            return
+        }
+        
+        let ref = db.collection("places").document((placeData?.placeDocumentID)!).collection("images").document(photo.imageDocumentID)
+        ref.delete() { err in
+            if let err = err {
+                print("Error removing document: \(photo.imageDocumentID), error: \(err)")
+            } else {
+                print("^^^ Document \(photo.imageDocumentID) successfully removed!")
+                guard let selectedIndex = self.collectionView.indexPathsForSelectedItems?.first else {
+                    print("*** tried to delete invalid selection!")
+                    return
+                }
+                self.photos.remove(at: selectedIndex.row)
+                self.collectionView.deleteItems(at: [selectedIndex])
+            }
+        }
+        let placeStorageRef = storage.reference().child(placeDocumentID).child(photo.imageDocumentID)
+        // Delete the file
+        placeStorageRef.delete { error in
+            if let error = error {
+                print("*** ERROR: \(error.localizedDescription) In deletePhoto trying to delete \(placeStorageRef)")
+            } else {
+                print("Successfully deleted selected photo")
+            }
+        }
+    }
+    
+    func deleteReview(review: Review) {
+        let ref = db.collection("places").document((placeData?.placeDocumentID)!).collection("reviews").document(review.reviewDocumentID)
+        ref.delete() { err in
+            if let err = err {
+                print("Error removing document: \(review.reviewDocumentID), error: \(err)")
+            } else {
+                print("^^^ Document \(review.reviewDocumentID) successfully removed!")
+                guard let selectedIndex = self.tableView.indexPathForSelectedRow else {
+                    print("*** tried to delete invalid selection!")
+                    return
+                }
+                self.reviews.remove(at: selectedIndex.row)
+                self.tableView.deleteRows(at: [selectedIndex], with: .fade)
+            }
+        }
+    }
     
     func centerMap(mapLocation: CLLocationCoordinate2D, regionRadius: CLLocationDistance) {
         let region = MKCoordinateRegionMakeWithDistance(mapLocation, regionRadius, regionRadius)
@@ -270,9 +329,16 @@ class DetailViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.identifier! {
+        case "AddPhoto":
+            let currentUser = Auth.auth().currentUser?.email ?? ""
+            let photo = Photo(image: newImage, imageDocumentID: "", imageDescription: "", postedBy: currentUser, date: Date())
+            let navigationController = segue.destination as! UINavigationController
+            let destination = navigationController.viewControllers.first as! PhotoViewController
+            destination.photo = photo
         case "ShowPhoto":
         let destination = segue.destination as! PhotoViewController
-        destination.photoImage = placeImages[collectionView.indexPathsForSelectedItems!.first!.row]
+            destination.photo = photos[collectionView.indexPathsForSelectedItems!.first!.row]
+        // destination.photoImage = photos[collectionView.indexPathsForSelectedItems!.first!.row]
         case "UnwindFromDetailWithSegue":
             placeData?.placeName = placeNameField.text!
             placeData?.address = addressField.text!
@@ -300,18 +366,33 @@ class DetailViewController: UIViewController {
             if let indexPath = tableView.indexPathForSelectedRow {
                 reviews[indexPath.row] = source.review
                 tableView.reloadRows(at: [indexPath], with: .automatic)
-                saveData(placeData: placeData!, review: reviews[indexPath.row], image: nil)
+                saveData(placeData: placeData!, review: reviews[indexPath.row], photo: nil)
             } else {
                 let indexPath = IndexPath(row: reviews.count, section: 0)
                 reviews.append(source.review)
                 tableView.insertRows(at: [indexPath], with: .automatic)
                 tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
-                saveData(placeData: placeData!, review: reviews[indexPath.row], image: nil)
+                saveData(placeData: placeData!, review: reviews[indexPath.row], photo: nil)
             }
         case "deleteUnwind":
-            print("Delete here")
+            let source = segue.source as! ReviewTableViewController
+            deleteReview(review: source.review)
         default:
             print("ERROR: unidentified segue returning inside of unwindFromRating")
+        }
+    }
+    
+    @IBAction func unwindFromPhotoViewController(segue: UIStoryboardSegue) {
+        let source = segue.source as! PhotoViewController
+        switch segue.identifier! {
+        case "DeletePhoto":
+            deletePhoto(photo: source.photo)
+        case "SavePhoto":
+            savePhoto(placeDocumentID: (placeData?.placeDocumentID)!, photo: source.photo)
+        case "CancelPhoto":
+            print("CancelPhoto pressed. Nothing to save")
+        default:
+            print("*** incorrectly landed on default case in unwindFromPhotoViewController")
         }
     }
     
@@ -492,11 +573,16 @@ extension DetailViewController: UINavigationControllerDelegate, UIImagePickerCon
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         let selectedImage = info[UIImagePickerControllerOriginalImage] as! UIImage
-        placeImages.insert(selectedImage, at: 0)
         newImage = selectedImage
+        // update stuff below
+//        photos.insert(selectedImage, at: 0)
+//        newImage = selectedImage
+//        dismiss(animated: true) {
+//            self.saveData(placeData: self.placeData!, review: nil, image: self.newImage)
+//            self.collectionView.reloadData()
+//        }
         dismiss(animated: true) {
-            self.saveData(placeData: self.placeData!, review: nil, image: self.newImage)
-            self.collectionView.reloadData()
+            self.performSegue(withIdentifier: "AddPhoto", sender: nil)
         }
     }
     
@@ -521,12 +607,12 @@ extension DetailViewController: UINavigationControllerDelegate, UIImagePickerCon
 
 extension DetailViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return placeImages.count
+        return photos.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCell", for: indexPath) as! PlaceImageCollectionViewCell
-        cell.placeImage.image = placeImages[indexPath.row]
+        cell.placeImage.image = photos[indexPath.row].image
         return cell
     }
 }
