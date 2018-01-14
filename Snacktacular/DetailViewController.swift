@@ -20,6 +20,8 @@ class DetailViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var rateItButton: UIButton!
     @IBOutlet weak var saveBarButtonItem: UIBarButtonItem!
+    @IBOutlet weak var cancelBarButtonItem: UIBarButtonItem!
+    @IBOutlet weak var averageRatingLabel: UILabel!
     
     var placeData: PlaceData?
     var locationManger: CLLocationManager!
@@ -28,7 +30,19 @@ class DetailViewController: UIViewController {
     var imagePicker = UIImagePickerController()
     var newImage = UIImage()
     var photos = [Photo]()
-    var reviews = [Review]()
+    var reviews = [Review]() {
+        didSet {
+            guard reviews.count != 0 else {
+                averageRatingLabel.text = "-.-"
+                return
+            }
+            let averageRating = Double(self.reviews.reduce(0, {$0 + $1.rating})) / Double(self.reviews.count)
+            
+            let ratingString = String(format: "%.1f", averageRating)
+            averageRatingLabel.text = ratingString
+        }
+    }
+    
     var newReviews = [Review]()
     var db: Firestore!
     var storage: Storage!
@@ -49,11 +63,6 @@ class DetailViewController: UIViewController {
         
         db = Firestore.firestore()
         storage = Storage.storage()
-        
-//        reviews.append(Review(reviewHeadline: "Awesome!", reviewText: "Really liked the guac and chips!", rating: 5, reviewBy: "prof.gallaugher@gmail.com"))
-//        reviews.append(Review(reviewHeadline: "Meh...", reviewText: "Burger bun was soggy. Should have been toasted", rating: 3, reviewBy: "john.gallaugher@gmail.com"))
-//        reviews.append(Review(reviewHeadline: "Avoid it", reviewText: "I got sick :(", rating: 0, reviewBy: "grumpycat@gmail.com"))
-//                reviews.append(Review(reviewHeadline: "Legendary. Try the concrete", reviewText: "I really like chocolate with peanut butter sauce. Their beer is also good.", rating: 4, reviewBy: "bonvivon@gmail.com"))
     
         // These three lines will dismiss the keyboard when one taps outside of a textField
         let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
@@ -66,10 +75,18 @@ class DetailViewController: UIViewController {
 //            mapView.removeAnnotations(mapView.annotations)
 //            mapView.addAnnotation(placeData)
 //            mapView.selectAnnotation(placeData, animated: true)
+            
+            // blank out Cancel and Save buttons
+            saveBarButtonItem.title = ""
+            cancelBarButtonItem.title = ""
+            placeNameField.isEnabled = false
+            addressField.isEnabled = false
             updateUserInterface()
             loadImages()
             loadReviews()
         } else {
+            // Turn off the back button & keep Save and Cancel as is
+            self.navigationItem.leftItemsSupplementBackButton = false
             placeData = PlaceData()
             getLocation()
         }
@@ -145,6 +162,7 @@ class DetailViewController: UIViewController {
                 review.reviewDocumentID = document.documentID
                 self.reviews.append(review)
             }
+//            self.averageRating = Double(self.reviews.reduce(0, {$0 + $1.rating})) / Double(self.reviews.count)
             self.tableView.reloadData()
         }
     }
@@ -199,8 +217,21 @@ class DetailViewController: UIViewController {
             }
         }
     }
-    
-//    func saveImage(placeDocumentID: String) {
+   
+    func updateAverageRating(){
+        var averageRating = 0.0
+        if reviews.count > 0 {
+            averageRating = Double(self.reviews.reduce(0, {$0 + $1.rating})) / Double(self.reviews.count)
+        }
+        db.collection("places").document((placeData?.placeDocumentID)!).updateData(["averageRating": averageRating]) { err in
+            if let err = err {
+                print("Error updating averageRating: \(err). ref \((self.placeData?.placeDocumentID)!)")
+            } else {
+                print("*** Updated average successfully updated")
+            }
+        }
+    }
+
     func savePhoto(placeDocumentID: String, photo: Photo) {
         let photoName = NSUUID().uuidString+".jpg" // always creates a unique string in part based on time/date
         photo.imageDocumentID = photoName
@@ -259,6 +290,7 @@ class DetailViewController: UIViewController {
                     print("ERROR: updating review \(error.localizedDescription)")
                 } else {
                     print("Review updated with reviewDocumentID \(review.reviewDocumentID)")
+                    self.updateAverageRating()
                 }
             }
         } else { // Otherwise we don't have a document ID, so we must be adding a new review, so we need to create the ref ID and save a new review document
@@ -269,6 +301,7 @@ class DetailViewController: UIViewController {
                 } else {
                     review.reviewDocumentID = "\(ref!.documentID)"
                     print("Document added for place \(placeData.placeDocumentID) and review \(review.reviewDocumentID)")
+                    self.updateAverageRating()
                 }
             }
         }
@@ -318,6 +351,7 @@ class DetailViewController: UIViewController {
                 }
                 self.reviews.remove(at: selectedIndex.row)
                 self.tableView.deleteRows(at: [selectedIndex], with: .fade)
+//                self.averageRating = Double(self.reviews.reduce(0, {$0 + $1.rating})) / Double(self.reviews.count)
             }
         }
     }
@@ -333,10 +367,10 @@ class DetailViewController: UIViewController {
             let currentUser = Auth.auth().currentUser?.email ?? ""
             let photo = Photo(image: newImage, imageDocumentID: "", imageDescription: "", postedBy: currentUser, date: Date())
             let navigationController = segue.destination as! UINavigationController
-            let destination = navigationController.viewControllers.first as! PhotoViewController
+            let destination = navigationController.viewControllers.first as! PhotoTableViewController
             destination.photo = photo
         case "ShowPhoto":
-        let destination = segue.destination as! PhotoViewController
+        let destination = segue.destination as! PhotoTableViewController
             destination.photo = photos[collectionView.indexPathsForSelectedItems!.first!.row]
         // destination.photoImage = photos[collectionView.indexPathsForSelectedItems!.first!.row]
         case "UnwindFromDetailWithSegue":
@@ -350,6 +384,10 @@ class DetailViewController: UIViewController {
             destination.name = placeNameField.text
             destination.address = addressField.text
         case "AddRatingSegue":
+            let navigationController = segue.destination as! UINavigationController
+            let destination = navigationController.viewControllers.first as! ReviewTableViewController
+            destination.name = placeNameField.text
+            destination.address = addressField.text
         // do deselect here:
             if let selectedIndexPath = tableView.indexPathForSelectedRow {
                 tableView.deselectRow(at: selectedIndexPath, animated: true)
@@ -383,7 +421,7 @@ class DetailViewController: UIViewController {
     }
     
     @IBAction func unwindFromPhotoViewController(segue: UIStoryboardSegue) {
-        let source = segue.source as! PhotoViewController
+        let source = segue.source as! PhotoTableViewController
         switch segue.identifier! {
         case "DeletePhoto":
             deletePhoto(photo: source.photo)

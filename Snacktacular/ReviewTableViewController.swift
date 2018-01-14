@@ -38,12 +38,13 @@ class ReviewTableViewController: UITableViewController {
         tap.cancelsTouchesInView = false
         self.view.addGestureRecognizer(tap)
         
-        if (review) != nil {
+        if review != nil {
             configureUserInterface()
         } else {
             // This is a new review
             // Temporarily set reviewDocumentID to an empty string. We'll create an ID when saving the review in DeetailViewController
             review = Review(reviewHeadline: "", reviewText: "", rating: 0, reviewBy: Auth.auth().currentUser?.email ?? "", reviewDocumentID: "")
+            configureUserInterface()
         }
     }
     
@@ -54,19 +55,21 @@ class ReviewTableViewController: UITableViewController {
         addressLabel.text = address
         // update buttons
         for button in starButtonCollection {
-            if button.tag <= review.rating-1 {
+            if button.tag <= review.rating {
                 button.setImage(UIImage(named: "star-filled"), for: .normal)
             }
         }
         //TODO: - update below so instead of string, it compares against real UserID
         //If person viewing left the review, show save & cancel and get rid of the < button
         if review.reviewBy == "\((currentUser?.email)!)" {
-            saveBarButton.title = "Update"
+            if review.reviewHeadline != "" {
+                saveBarButton.title = "Update"
+                deleteReviewButton.isHidden = true
+            }
             self.navigationItem.leftItemsSupplementBackButton = false
             addBorder(view: reviewContentView, alpha: 1.0)
             addBorder(view: reviewTitleLabel, alpha: 1.0)
             addBorder(view: starBackgroundView, alpha: 1.0)
-            deleteReviewButton.isHidden = false
         } else { // hide save & cancel
             reviewedByLabel.text = "review by: " + review.reviewBy
             self.saveBarButton.title = ""
@@ -82,6 +85,7 @@ class ReviewTableViewController: UITableViewController {
                 button.isEnabled = false
             }
         }
+        enableDisableSaveButton()
     }
     
     func addBorder(view: UIView, alpha: CGFloat) {
@@ -91,9 +95,22 @@ class ReviewTableViewController: UITableViewController {
         view.layer.cornerRadius = 5.0
     }
     
+    func enableDisableSaveButton() {
+        if reviewTitleLabel.text != "" && review.rating > 0 {
+            saveBarButton.isEnabled = true
+        } else {
+            saveBarButton.isEnabled = false
+        }
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         review.reviewHeadline = reviewTitleLabel.text!
         review.reviewText = reviewContentView.text!
+    }
+    
+    
+    @IBAction func reviewTitleChanged(_ sender: UITextField) {
+        enableDisableSaveButton()
     }
     
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
@@ -114,6 +131,7 @@ class ReviewTableViewController: UITableViewController {
                 button.setImage(UIImage(named: "star-empty"), for: .normal)
             }
         }
+        enableDisableSaveButton()
     }
     
     @IBAction func deleteReviewPressed(_ sender: UIButton) {

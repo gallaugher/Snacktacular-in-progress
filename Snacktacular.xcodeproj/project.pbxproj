@@ -23,6 +23,7 @@
 		3E795C691FC88E9800258D81 /* PlaceListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C681FC88E9800258D81 /* PlaceListViewController.swift */; };
 		3E795C6B1FC8933700258D81 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C6A1FC8933700258D81 /* DetailViewController.swift */; };
 		3E795C6F1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C6E1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift */; };
+		3E7B46F2200AA8C4001F453D /* PhotoTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7B46F1200AA8C4001F453D /* PhotoTableViewController.swift */; };
 		3E9A51BF200953950086A15D /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A51BE200953950086A15D /* Photo.swift */; };
 		3EB7CA482001551000464B07 /* ActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB7CA472001551000464B07 /* ActivityIndicatorView.swift */; };
 /* End PBXBuildFile section */
@@ -47,6 +48,7 @@
 		3E795C681FC88E9800258D81 /* PlaceListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceListViewController.swift; sourceTree = "<group>"; };
 		3E795C6A1FC8933700258D81 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		3E795C6E1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+preferredStatusBarStyle.swift"; sourceTree = "<group>"; };
+		3E7B46F1200AA8C4001F453D /* PhotoTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoTableViewController.swift; sourceTree = "<group>"; };
 		3E9A51BE200953950086A15D /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		3EB7CA472001551000464B07 /* ActivityIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorView.swift; sourceTree = "<group>"; };
 		E16D9590DA45D596D5A66145 /* Pods-Snacktacular.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Snacktacular.release.xcconfig"; path = "Pods/Target Support Files/Pods-Snacktacular/Pods-Snacktacular.release.xcconfig"; sourceTree = "<group>"; };
@@ -97,6 +99,7 @@
 				3E56F5D21FFC23ED00435DD5 /* ReviewTableViewCell.swift */,
 				3E6897FC1FD209B300541B68 /* PlaceImageCollectionViewCell.swift */,
 				3E6897FE1FD20DEB00541B68 /* PhotoViewController.swift */,
+				3E7B46F1200AA8C4001F453D /* PhotoTableViewController.swift */,
 				3E3DC1AA1FFDB3BC0041F5A8 /* ReviewTableViewController.swift */,
 				3E795C581FC88D7500258D81 /* Main.storyboard */,
 				3E795C5B1FC88D7500258D81 /* Assets.xcassets */,
@@ -299,6 +302,7 @@
 				3E6897FF1FD20DEB00541B68 /* PhotoViewController.swift in Sources */,
 				3E795C6F1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift in Sources */,
 				3E56F5D31FFC23ED00435DD5 /* ReviewTableViewCell.swift in Sources */,
+				3E7B46F2200AA8C4001F453D /* PhotoTableViewController.swift in Sources */,
 				3E795C6B1FC8933700258D81 /* DetailViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
