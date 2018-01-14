@@ -207,16 +207,16 @@ extension PlaceListViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        cell.textLabel?.text = places[indexPath.row].placeName
-        //cell.detailTextLabel?.text = places[indexPath.row].address
-        //cell.detailTextLabel?.text = places[indexPath.row].postingUserID
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! PlacesTableViewCell
+        cell.placeNameLabel.text = places[indexPath.row].placeName
         var distanceInMiles = ""
         if currentLocation != nil {
             let distanceInMeters = self.places[indexPath.row].location.distance(from: currentLocation)
             distanceInMiles = "Distance: " + String(format: "%.2f", (distanceInMeters * 0.00062137)) + " miles"
         }
-        cell.detailTextLabel?.text = distanceInMiles
+        cell.distanceLabel.text = distanceInMiles
+        let avgRatingString = String(format: "%.1f", places[indexPath.row].averageRating)
+        cell.avgRatingLabel.text = "Avg. Rating: " + avgRatingString
         return cell
     }
 }
