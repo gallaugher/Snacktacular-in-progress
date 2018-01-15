@@ -18,9 +18,9 @@
 		3E795C5A1FC88D7500258D81 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3E795C581FC88D7500258D81 /* Main.storyboard */; };
 		3E795C5C1FC88D7500258D81 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E795C5B1FC88D7500258D81 /* Assets.xcassets */; };
 		3E795C5F1FC88D7500258D81 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3E795C5D1FC88D7500258D81 /* LaunchScreen.storyboard */; };
-		3E795C671FC88D9B00258D81 /* PlaceData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C661FC88D9B00258D81 /* PlaceData.swift */; };
+		3E795C671FC88D9B00258D81 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C661FC88D9B00258D81 /* Place.swift */; };
 		3E795C691FC88E9800258D81 /* PlaceListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C681FC88E9800258D81 /* PlaceListViewController.swift */; };
-		3E795C6B1FC8933700258D81 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C6A1FC8933700258D81 /* DetailViewController.swift */; };
+		3E795C6B1FC8933700258D81 /* PlaceDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C6A1FC8933700258D81 /* PlaceDetailViewController.swift */; };
 		3E795C6F1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C6E1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift */; };
 		3E7B46F2200AA8C4001F453D /* PhotoTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7B46F1200AA8C4001F453D /* PhotoTableViewController.swift */; };
 		3E7B46F4200AEFD0001F453D /* PlacesTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7B46F3200AEFD0001F453D /* PlacesTableViewCell.swift */; };
@@ -43,9 +43,9 @@
 		3E795C5B1FC88D7500258D81 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3E795C5E1FC88D7500258D81 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3E795C601FC88D7500258D81 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3E795C661FC88D9B00258D81 /* PlaceData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceData.swift; sourceTree = "<group>"; };
+		3E795C661FC88D9B00258D81 /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
 		3E795C681FC88E9800258D81 /* PlaceListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceListViewController.swift; sourceTree = "<group>"; };
-		3E795C6A1FC8933700258D81 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		3E795C6A1FC8933700258D81 /* PlaceDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDetailViewController.swift; sourceTree = "<group>"; };
 		3E795C6E1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+preferredStatusBarStyle.swift"; sourceTree = "<group>"; };
 		3E7B46F1200AA8C4001F453D /* PhotoTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoTableViewController.swift; sourceTree = "<group>"; };
 		3E7B46F3200AEFD0001F453D /* PlacesTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacesTableViewCell.swift; sourceTree = "<group>"; };
@@ -90,13 +90,13 @@
 			children = (
 				3E795C541FC88D7500258D81 /* AppDelegate.swift */,
 				3EB7CA472001551000464B07 /* ActivityIndicatorView.swift */,
-				3E795C661FC88D9B00258D81 /* PlaceData.swift */,
+				3E795C661FC88D9B00258D81 /* Place.swift */,
 				3E56F5D01FFC23B400435DD5 /* Review.swift */,
 				3E9A51BE200953950086A15D /* Photo.swift */,
 				3E795C6E1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift */,
 				3E795C681FC88E9800258D81 /* PlaceListViewController.swift */,
 				3E7B46F3200AEFD0001F453D /* PlacesTableViewCell.swift */,
-				3E795C6A1FC8933700258D81 /* DetailViewController.swift */,
+				3E795C6A1FC8933700258D81 /* PlaceDetailViewController.swift */,
 				3E56F5D21FFC23ED00435DD5 /* ReviewTableViewCell.swift */,
 				3E6897FC1FD209B300541B68 /* PlaceImageCollectionViewCell.swift */,
 				3E7B46F1200AA8C4001F453D /* PhotoTableViewController.swift */,
@@ -298,12 +298,12 @@
 				3EB7CA482001551000464B07 /* ActivityIndicatorView.swift in Sources */,
 				3E3DC1AB1FFDB3BC0041F5A8 /* ReviewTableViewController.swift in Sources */,
 				3E6897FD1FD209B300541B68 /* PlaceImageCollectionViewCell.swift in Sources */,
-				3E795C671FC88D9B00258D81 /* PlaceData.swift in Sources */,
+				3E795C671FC88D9B00258D81 /* Place.swift in Sources */,
 				3E7B46F4200AEFD0001F453D /* PlacesTableViewCell.swift in Sources */,
 				3E795C6F1FC89E6000258D81 /* UINavigationController+preferredStatusBarStyle.swift in Sources */,
 				3E56F5D31FFC23ED00435DD5 /* ReviewTableViewCell.swift in Sources */,
 				3E7B46F2200AA8C4001F453D /* PhotoTableViewController.swift in Sources */,
-				3E795C6B1FC8933700258D81 /* DetailViewController.swift in Sources */,
+				3E795C6B1FC8933700258D81 /* PlaceDetailViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

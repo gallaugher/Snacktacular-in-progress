@@ -1,5 +1,5 @@
 //
-//  PlaceData.swift
+//  Place.swift
 //  Snacktacular
 //
 //  Created by John Gallaugher on 11/24/17.
@@ -9,8 +9,9 @@
 import Foundation
 import CoreLocation
 import MapKit
+import Firebase
 
-class PlaceData: NSObject, MKAnnotation {
+class Place: NSObject, MKAnnotation {
     var placeName: String
     var address: String
     var postingUserID: String
@@ -64,5 +65,45 @@ class PlaceData: NSObject, MKAnnotation {
         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         let averageRating = dictionary["averageRating"] as! Double? ?? 0.0
         self.init(placeName: placeName, address: address, coordinate: coordinate, postingUserID: postingUserID, placeDocumentID: "", averageRating: averageRating)
+    }
+    
+    func saveData(completion: @escaping () -> ())  {
+        let db = Firestore.firestore()
+        
+         // Grab the unique userID
+                if let postingUserID = (Auth.auth().currentUser?.email) {
+                    self.postingUserID = postingUserID
+                } else {
+                    self.postingUserID = "unknown user"
+                }
+        
+        // Create the dictionary representing data we want to save
+        let dataToSave: [String: Any] = self.dictionary
+        
+        // if we HAVE saved a record, we'll have an ID
+        if self.placeDocumentID != "" {
+            let ref = db.collection("places").document(self.placeDocumentID)
+            ref.setData(dataToSave) { (error) in
+                if let error = error {
+                    print("ERROR: updating document \(error.localizedDescription)")
+                } else {
+                    print("Document updated with reference ID \(ref.documentID)")
+                }
+                print(">>> placeDocumentID = \(self.placeDocumentID)")
+                completion()
+            }
+        } else { // Otherwise we don't have a document ID so we need to create the ref ID and save a new document
+            var ref: DocumentReference? = nil // Firestore will creat a new ID for us
+            ref = db.collection("places").addDocument(data: dataToSave) { (error) in
+                if let error = error {
+                    print("ERROR: adding document \(error.localizedDescription)")
+                } else {
+                    print("Document added with reference ID \(ref!.documentID)")
+                    self.placeDocumentID = "\(ref!.documentID)"
+                }
+                print(">>> placeDocumentID = \(self.placeDocumentID)")
+                completion()
+            }
+        }
     }
 }

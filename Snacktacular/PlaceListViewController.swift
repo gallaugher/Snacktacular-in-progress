@@ -12,13 +12,12 @@ import Firebase
 import FirebaseAuthUI
 import FirebaseGoogleAuthUI
 import CoreLocation
- 
 
 class PlaceListViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var sortSegmentControl: UISegmentedControl!
-    var places = [PlaceData]()
+    var places = [Place]()
     var authUI: FUIAuth!
     var db: Firestore!
     var storage: Storage!
@@ -50,6 +49,7 @@ class PlaceListViewController: UIViewController {
         super.viewDidAppear(animated)
         signIn()
         getLocation()
+        sortBasedOnSegmentPressed()
     }
     
     func signIn() {
@@ -70,65 +70,11 @@ class PlaceListViewController: UIViewController {
             }
             self.places = []
             for document in querySnapshot!.documents {
-                let placeData = PlaceData(dictionary: document.data())
-                placeData.placeDocumentID = document.documentID
-                self.places.append(placeData)
+                let place = Place(dictionary: document.data())
+                place.placeDocumentID = document.documentID
+                self.places.append(place)
             }
-            if self.sortSegmentControl.selectedSegmentIndex == 0 {
-                self.tableView.reloadData()
-            } else {
-                self.sortBasedOnSegmentPressed()
-            }
-        }
-    }
-    
-    func loadData() {
-        db.collection("places").getDocuments { (querySnapshot, error) in
-            guard error == nil else {
-                print("ERROR: adding the snapshot listener \(error!.localizedDescription)")
-                return
-            }
-            self.places = []
-            for document in querySnapshot!.documents {
-                let placeData = PlaceData(dictionary: document.data())
-                placeData.placeDocumentID = document.documentID
-                self.places.append(placeData)
-            }
-            self.tableView.reloadData()
-        }
-    }
-    
-    func saveData(placeData: PlaceData) {
-        // Grab the unique userID
-        if let postingUserID = (authUI.auth?.currentUser?.email) {
-            placeData.postingUserID = postingUserID
-        } else {
-            placeData.postingUserID = "unknown user"
-        }
-        
-        // Create the dictionary representing data we want to save
-        let dataToSave: [String: Any] = placeData.dictionary
-        
-        // if we HAVE saved a record, we'll have an ID
-        if placeData.placeDocumentID != "" {
-            let ref = db.collection("places").document(placeData.placeDocumentID)
-            ref.setData(dataToSave) { (error) in
-                if let error = error {
-                    print("ERROR: updating document \(error.localizedDescription)")
-                } else {
-                    print("Document updated with reference ID \(ref.documentID)")
-                }
-            }
-        } else { // Otherwise we don't have a document ID so we need to create the ref ID and save a new document
-            var ref: DocumentReference? = nil // Firestore will creat a new ID for us
-            ref = db.collection("places").addDocument(data: dataToSave) { (error) in
-                if let error = error {
-                    print("ERROR: adding document \(error.localizedDescription)")
-                } else {
-                    print("Document added with reference ID \(ref!.documentID)")
-                    placeData.placeDocumentID = "\(ref!.documentID)"
-                }
-            }
+            self.sortBasedOnSegmentPressed()
         }
     }
     
@@ -141,10 +87,10 @@ class PlaceListViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowDetail" {
-            let destination = segue.destination as! DetailViewController
+            let destination = segue.destination as! PlaceDetailViewController
 //            let destination = segue.destination as! DetailTableViewController
             let selectedRow = tableView.indexPathForSelectedRow!.row
-            destination.placeData = places[selectedRow]
+            destination.place = places[selectedRow]
         } else {
             if let selectedIndexPath = tableView.indexPathForSelectedRow {
                 tableView.deselectRow(at: selectedIndexPath, animated: true)
@@ -160,34 +106,41 @@ class PlaceListViewController: UIViewController {
     
     func sortBasedOnSegmentPressed() {
         switch sortSegmentControl.selectedSegmentIndex {
-        case 0: // unsorted
-            loadData()
-        case 1: // A-Z
+
+        case 0: // A-Z
             let sortedPlaces = places.sorted(by: {$0.placeName < $1.placeName})
             places = sortedPlaces
             tableView.reloadData()
-        case 2: // closest
+        case 1: // closest
             if currentLocation != nil {
                 closestSort()
                 getLocation()
             } else {
                 getLocation()
             }
+        case 2: // averageRating
+            let sortedPlaces = places.sorted(by: {$0.averageRating > $1.averageRating})
+            places = sortedPlaces
+            tableView.reloadData()
         default:
             print("HEY, you shouldn't have gotten her. Check out the segmented control for an error.")
         }
     }
     
     @IBAction func unwindFromDetail(segue: UIStoryboardSegue) {
-        let source = segue.source as! DetailViewController
+        let source = segue.source as! PlaceDetailViewController
         //let source = segue.source as! DetailTableViewController
-        saveData(placeData: source.placeData!)
+        source.place!.saveData {}
+        // saveData(place: source.place!)
     }
     
     @IBAction func signOutButtonPressed(_ sender: UIBarButtonItem) {
         do {
             try authUI!.signOut()
             print("^^^ Successfully signed out!")
+            places = []
+            tableView.reloadData()
+            tableView.isHidden = true
             signIn()
         } catch {
             print("Couldn't sign out")
@@ -236,6 +189,7 @@ extension PlaceListViewController: FUIAuthDelegate {
     func authUI(_ authUI: FUIAuth, didSignInWith user: User?, error: Error?) {
         if let user = user {
             print("*** Successfully logged in with user = \(user.email!)")
+            tableView.isHidden = false
         }
     }
     
@@ -298,11 +252,7 @@ extension PlaceListViewController: FUIAuthDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         currentLocation = locations.last
         print("CURRENT LOCATION = \(currentLocation.coordinate.latitude) \(currentLocation.coordinate.longitude)")
-        if sortSegmentControl.selectedSegmentIndex == 2 {
-            closestSort()
-        } else {
-            tableView.reloadData()
-        }
+        sortBasedOnSegmentPressed()
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
