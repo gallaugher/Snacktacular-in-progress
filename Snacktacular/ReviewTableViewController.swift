@@ -43,7 +43,7 @@ class ReviewTableViewController: UITableViewController {
         } else {
             // This is a new review
             // Temporarily set reviewDocumentID to an empty string. We'll create an ID when saving the review in DeetailViewController
-            review = Review(reviewHeadline: "", reviewText: "", rating: 0, reviewBy: Auth.auth().currentUser?.email ?? "", reviewDocumentID: "")
+            review = Review(reviewHeadline: "", reviewText: "", rating: 0, reviewBy: Auth.auth().currentUser?.uid ?? "", reviewDocumentID: "")
             configureUserInterface()
         }
     }
@@ -61,7 +61,7 @@ class ReviewTableViewController: UITableViewController {
         }
         //TODO: - update below so instead of string, it compares against real UserID
         //If person viewing left the review, show save & cancel and get rid of the < button
-        if review.reviewBy == "\((currentUser?.email)!)" {
+        if review.reviewBy == "\((currentUser?.uid)!)" {
             if review.reviewHeadline != "" {
                 saveBarButton.title = "Update"
                 deleteReviewButton.isHidden = true

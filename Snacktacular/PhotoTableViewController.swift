@@ -40,11 +40,12 @@ class PhotoTableViewController: UITableViewController {
         if let photo = photo {
             photoImageView.image = photo.image
             descriptionField.text = photo.imageDescription
+            
             postedByLabel.text = "\(photo.postedBy)"
             let formattedDate = dateFormatter.string(from: photo.date)
             postedOnLabel.text = "\(formattedDate)"
             let currentUser = Auth.auth().currentUser
-            if currentUser?.email == photo.postedBy {
+            if currentUser?.uid == photo.postedBy {
                 if photo.imageDocumentID != "" {
                     deleteButton.isHidden = false
                     descriptionField.isEnabled = false

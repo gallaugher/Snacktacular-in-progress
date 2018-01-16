@@ -17,6 +17,8 @@ class PlaceListViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var sortSegmentControl: UISegmentedControl!
+    @IBOutlet weak var signOutBarButton: UIBarButtonItem!
+    
     var places = [Place]()
     var authUI: FUIAuth!
     var db: Firestore!
@@ -30,6 +32,7 @@ class PlaceListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureLeftBarButtonItems() // needed to create smaller space
         db = Firestore.firestore()
         storage = Storage.storage()
         authUI = FUIAuth.defaultAuthUI()
@@ -52,6 +55,32 @@ class PlaceListViewController: UIViewController {
         sortBasedOnSegmentPressed()
     }
     
+    // Return a square bar button item of dimension passed (which should be 25 for standard
+    func configureImageBarButton(imageName: String, selector: Selector, dimension: CGFloat) -> UIBarButtonItem {
+        let image = UIImage(named: imageName)?.withRenderingMode(.alwaysOriginal) // alwaysOriginal will preserve transparent background and layers
+        let button = UIButton(type: UIButtonType.custom)
+        button.setImage(image, for: .normal)
+        button.addTarget(self, action: selector, for: .touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: dimension, height: dimension)
+        let barButtonItem = UIBarButtonItem(customView: button)
+        return barButtonItem
+    }
+    
+    func configureLeftBarButtonItems() {
+        var barButtonItemArray = [signOutBarButton!]
+        barButtonItemArray.append(configureImageBarButton(imageName: "singleUserPDF", selector: #selector(singleUserPressed), dimension: 25))
+        barButtonItemArray.append(configureImageBarButton(imageName: "usersPDF", selector: #selector(usersPressed), dimension: 25))
+        navigationItem.leftBarButtonItems = barButtonItemArray
+    }
+    
+    @objc func singleUserPressed() {
+        print("*** Single User Bar Button Item Pressed!")
+    }
+
+    @objc func usersPressed() {
+        print("*** Multiple Users Bar Button Item Pressed!")
+    }
+    
     func signIn() {
         let providers: [FUIAuthProvider] = [
             FUIGoogleAuth()
@@ -59,6 +88,26 @@ class PlaceListViewController: UIViewController {
         if authUI.auth?.currentUser == nil {
             self.authUI?.providers = providers
             present(authUI.authViewController(), animated: true, completion: nil)
+        }
+    }
+    
+    func saveUserIfNeeded() {
+        guard let currentUser = Auth.auth().currentUser else {
+            return
+        }
+        let userRef = db.collection("users").document("\(currentUser.uid)")
+        userRef.getDocument { (document, error) in
+            guard error == nil else {
+                print("error in query, but here's the result of document.exists \(document?.exists)")
+                return
+            }
+            guard document?.exists == false else {
+                print("Document exists for user \(currentUser.uid)")
+                return
+            }
+            // No errors, but no document, so create new user
+            let newUser = SnackUser(user: currentUser)
+            newUser.saveData()
         }
     }
     
@@ -88,7 +137,6 @@ class PlaceListViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowDetail" {
             let destination = segue.destination as! PlaceDetailViewController
-//            let destination = segue.destination as! DetailTableViewController
             let selectedRow = tableView.indexPathForSelectedRow!.row
             destination.place = places[selectedRow]
         } else {
@@ -127,11 +175,19 @@ class PlaceListViewController: UIViewController {
         }
     }
     
-    @IBAction func unwindFromDetail(segue: UIStoryboardSegue) {
-        let source = segue.source as! PlaceDetailViewController
-        //let source = segue.source as! DetailTableViewController
-        source.place!.saveData {}
-        // saveData(place: source.place!)
+    @IBAction func unwindFromPlaceDetail(segue: UIStoryboardSegue) {
+//        let source = segue.source as! PlaceDetailViewController
+//        source.place!.saveData {}
+        switch segue.identifier! {
+        case "SaveFromPlaceDetail":
+            let source = segue.source as! PlaceDetailViewController
+            let place = source.place
+            place?.saveData{}
+        case "CancelFromPlaceDetail":
+            print("Cancelled, nothing saved from PlaceDetailViewController")
+        default:
+            print("default condition reached in unwindFromPlaceDetail - should have not happened.")
+        }
     }
     
     @IBAction func signOutButtonPressed(_ sender: UIBarButtonItem) {
@@ -188,8 +244,9 @@ extension PlaceListViewController: FUIAuthDelegate {
     
     func authUI(_ authUI: FUIAuth, didSignInWith user: User?, error: Error?) {
         if let user = user {
-            print("*** Successfully logged in with user = \(user.email!)")
+            print("*** Successfully logged in with userID \(user.uid) email = \(user.email!)")
             tableView.isHidden = false
+            saveUserIfNeeded()
         }
     }
     

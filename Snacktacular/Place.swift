@@ -53,7 +53,9 @@ class Place: NSObject, MKAnnotation {
     }
     
     convenience override init() {
-        self.init(placeName: "", address: "", coordinate: CLLocationCoordinate2D(), postingUserID: "", placeDocumentID: "", averageRating: 0.0)
+        let db = Firestore.firestore()
+        let placeDocRef = db.collection("places").document().documentID
+        self.init(placeName: "", address: "", coordinate: CLLocationCoordinate2D(), postingUserID: "", placeDocumentID: placeDocRef, averageRating: 0.0)
     }
     
     convenience init(dictionary: [String: Any]) {
@@ -71,7 +73,7 @@ class Place: NSObject, MKAnnotation {
         let db = Firestore.firestore()
         
          // Grab the unique userID
-                if let postingUserID = (Auth.auth().currentUser?.email) {
+                if let postingUserID = (Auth.auth().currentUser?.uid) {
                     self.postingUserID = postingUserID
                 } else {
                     self.postingUserID = "unknown user"
