@@ -69,6 +69,14 @@ class Place: NSObject, MKAnnotation {
         self.init(placeName: placeName, address: address, coordinate: coordinate, postingUserID: postingUserID, placeDocumentID: "", averageRating: averageRating)
     }
     
+    func documentReference() -> DocumentReference {
+        let db = Firestore.firestore()
+        let placeRef: DocumentReference!
+        // placeDocumentID was set during Place()
+        placeRef = db.collection("places").document(self.placeDocumentID)
+        return placeRef
+    }
+    
     func saveData(completion: @escaping () -> ())  {
         let db = Firestore.firestore()
         
@@ -91,7 +99,6 @@ class Place: NSObject, MKAnnotation {
                 } else {
                     print("Document updated with reference ID \(ref.documentID)")
                 }
-                print(">>> placeDocumentID = \(self.placeDocumentID)")
                 completion()
             }
         } else { // Otherwise we don't have a document ID so we need to create the ref ID and save a new document
@@ -100,10 +107,8 @@ class Place: NSObject, MKAnnotation {
                 if let error = error {
                     print("ERROR: adding document \(error.localizedDescription)")
                 } else {
-                    print("Document added with reference ID \(ref!.documentID)")
                     self.placeDocumentID = "\(ref!.documentID)"
                 }
-                print(">>> placeDocumentID = \(self.placeDocumentID)")
                 completion()
             }
         }

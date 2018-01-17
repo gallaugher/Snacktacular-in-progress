@@ -19,6 +19,8 @@ class PhotoTableViewController: UITableViewController {
     @IBOutlet weak var saveBarButton: UIBarButtonItem!
     
     var photo: Photo!
+    var currentUser = Auth.auth().currentUser
+    var postingUser: SnackUser?
     let dateFormatter = DateFormatter()
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -37,35 +39,46 @@ class PhotoTableViewController: UITableViewController {
         dateFormatter.dateStyle = .medium
         dateFormatter.timeStyle = .none
         
-        if let photo = photo {
+        if photo == nil {
+            // Create new review by currentUser
+            photo = Photo(postedBy: currentUser!.uid)
+        } else {
             photoImageView.image = photo.image
             descriptionField.text = photo.imageDescription
-            
-            postedByLabel.text = "\(photo.postedBy)"
-            let formattedDate = dateFormatter.string(from: photo.date)
-            postedOnLabel.text = "\(formattedDate)"
-            let currentUser = Auth.auth().currentUser
-            if currentUser?.uid == photo.postedBy {
-                if photo.imageDocumentID != "" {
-                    deleteButton.isHidden = false
-                    descriptionField.isEnabled = false
-                    // hides the cancel and save buttons
-                    self.saveBarButton.title = ""
-                    self.cancelBarButton.title = ""
-                } else {
-                    deleteButton.isHidden = true
-                    descriptionField.isEnabled = true
-                    descriptionField.becomeFirstResponder()
-                    // hides the <Back button
-                    self.navigationItem.leftItemsSupplementBackButton = false
-                }
-            } else {
+        }
+        photo.getPostedBy() { (postingUser) in
+            self.postingUser = postingUser
+            self.configureUserInterface()
+        }
+    }
+    
+    func configureUserInterface() {
+        photoImageView.image = photo.image
+        descriptionField.text = photo.imageDescription
+        postedByLabel.text = "\(postingUser!.email)"
+        let formattedDate = dateFormatter.string(from: photo.date)
+        postedOnLabel.text = "\(formattedDate)"
+        
+        if Auth.auth().currentUser?.uid == photo.postedBy {
+            if photo.imageDocumentID != "" { // User is looking a photo they posted
+                deleteButton.isHidden = false
                 descriptionField.isEnabled = false
                 // hides the cancel and save buttons
                 self.saveBarButton.title = ""
                 self.cancelBarButton.title = ""
+            } else { // otherwise this is a new photo
                 deleteButton.isHidden = true
+                descriptionField.isEnabled = true
+                descriptionField.becomeFirstResponder()
+                // hides the <Back button
+                self.navigationItem.leftItemsSupplementBackButton = false
             }
+        } else {
+            descriptionField.isEnabled = false
+            // hides the cancel and save buttons
+            self.saveBarButton.title = ""
+            self.cancelBarButton.title = ""
+            deleteButton.isHidden = true
         }
         enableDisableSaveButton()
     }

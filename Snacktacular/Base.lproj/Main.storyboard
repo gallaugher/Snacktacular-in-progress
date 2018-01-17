@@ -13,6 +13,7 @@
         <array key="AvenirNextCondensed.ttc">
             <string>AvenirNextCondensed-Bold</string>
             <string>AvenirNextCondensed-DemiBold</string>
+            <string>AvenirNextCondensed-Italic</string>
             <string>AvenirNextCondensed-Regular</string>
         </array>
         <array key="VerdanaBold.ttf">
@@ -255,7 +256,7 @@
                                     </constraints>
                                 </view>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="ReviewCell" id="jR3-Nv-7Md" customClass="ReviewTableViewCell" customModule="Snacktacular" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="ReviewCell" rowHeight="44" id="jR3-Nv-7Md" customClass="ReviewTableViewCell" customModule="Snacktacular" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="410" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="jR3-Nv-7Md" id="Tir-Dc-Wjh">
@@ -609,11 +610,23 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                                 </textView>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="posted: Dec. 32, 2019" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qhI-je-wG6">
+                                                    <rect key="frame" x="181" y="7" width="186" height="21"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="21" id="Vhs-dT-8yQ"/>
+                                                        <constraint firstAttribute="width" constant="186" id="dGf-1Z-JSD"/>
+                                                    </constraints>
+                                                    <fontDescription key="fontDescription" name="AvenirNextCondensed-Italic" family="Avenir Next Condensed" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
                                             </subviews>
                                             <constraints>
+                                                <constraint firstItem="qhI-je-wG6" firstAttribute="top" secondItem="JJY-tw-r5y" secondAttribute="top" constant="7" id="ADJ-IG-V1M"/>
                                                 <constraint firstItem="Q6L-V9-UEw" firstAttribute="leading" secondItem="JJY-tw-r5y" secondAttribute="leading" constant="8" id="AwE-iy-Bdz"/>
                                                 <constraint firstItem="lnv-ki-SxU" firstAttribute="top" secondItem="JJY-tw-r5y" secondAttribute="top" constant="5" id="BsB-A5-oxd"/>
                                                 <constraint firstItem="lnv-ki-SxU" firstAttribute="leading" secondItem="JJY-tw-r5y" secondAttribute="leading" constant="8" id="LsU-sG-3Xc"/>
+                                                <constraint firstAttribute="trailing" secondItem="qhI-je-wG6" secondAttribute="trailing" constant="8" id="Mo1-6m-hV9"/>
                                                 <constraint firstItem="Q6L-V9-UEw" firstAttribute="top" secondItem="lnv-ki-SxU" secondAttribute="bottom" constant="2" id="cQ6-H5-1EQ"/>
                                                 <constraint firstAttribute="bottom" secondItem="Q6L-V9-UEw" secondAttribute="bottom" constant="10.5" id="eS3-kt-ILK"/>
                                                 <constraint firstAttribute="trailing" secondItem="Q6L-V9-UEw" secondAttribute="trailing" constant="8" id="idR-oY-s2y"/>
@@ -643,7 +656,6 @@
                                                         <color key="titleColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </state>
                                                     <connections>
-                                                        <action selector="deleteReviewPressed:" destination="OuT-Z1-ZFZ" eventType="touchUpInside" id="PUn-o1-7Of"/>
                                                         <segue destination="2WV-Sj-eGx" kind="unwind" identifier="DeleteUnwind" unwindAction="unwindFromReviewTableViewControllerWithSegue:" id="vBN-a4-sk0"/>
                                                     </connections>
                                                 </button>
@@ -682,6 +694,7 @@
                         <outlet property="deleteReviewButton" destination="nNc-Wv-ruj" id="WQe-aw-PWR"/>
                         <outlet property="nameLabel" destination="Oi2-hK-aVy" id="fdk-yc-gqK"/>
                         <outlet property="reviewContentView" destination="Q6L-V9-UEw" id="yPS-Bk-f6m"/>
+                        <outlet property="reviewDateLabel" destination="qhI-je-wG6" id="x0x-li-JJW"/>
                         <outlet property="reviewTitleLabel" destination="aYn-RS-FMv" id="t4i-yZ-hk9"/>
                         <outlet property="reviewedByLabel" destination="P5n-nY-azM" id="tTh-PR-MZe"/>
                         <outlet property="saveBarButton" destination="XGg-dR-oNE" id="p17-pO-qbp"/>
@@ -701,7 +714,7 @@
                     <state key="normal" title="Delete Review"/>
                 </button>
             </objects>
-            <point key="canvasLocation" x="4730" y="-222"/>
+            <point key="canvasLocation" x="4728.8000000000002" y="-222.41379310344828"/>
         </scene>
         <!--Photo Table View Controller-->
         <scene sceneID="a8f-Wz-gKD">
@@ -847,7 +860,6 @@
                                                         <color key="titleColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </state>
                                                     <connections>
-                                                        <action selector="deleteReviewPressed:" destination="OuT-Z1-ZFZ" eventType="touchUpInside" id="4Om-dJ-Zp1"/>
                                                         <segue destination="3iY-se-bMV" kind="unwind" identifier="DeletePhoto" unwindAction="unwindFromPhotoViewControllerWithSegue:" id="b4T-I0-S7K"/>
                                                     </connections>
                                                 </button>

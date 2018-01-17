@@ -26,6 +26,14 @@ class SnackUser {
         self.userSince = userSince
     }
     
+    convenience init(dictionary: [String: Any]) {
+        let email = dictionary["email"] as! String? ?? ""
+        let displayName = dictionary["displayName"] as! String? ?? ""
+        let photoURL = dictionary["photoURL"] as! String? ?? ""
+        let userSince = dictionary["reviewBy"] as! Date? ?? Date()
+        self.init(email: email, displayName: displayName, photoURL: photoURL, userSince: userSince)
+    }
+    
     convenience init (user: User) {
         self.init(email: user.email ?? "", displayName: user.displayName ?? "", photoURL: ((user.photoURL != nil) ? "\(user.photoURL!)" : ""), userSince: Date())
     }

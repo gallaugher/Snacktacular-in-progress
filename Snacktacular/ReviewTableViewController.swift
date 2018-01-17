@@ -20,11 +20,15 @@ class ReviewTableViewController: UITableViewController {
     @IBOutlet weak var starBackgroundView: UIView!
     @IBOutlet weak var reviewedByLabel: UILabel!
     @IBOutlet weak var deleteReviewButton: UIButton!
+    @IBOutlet weak var reviewDateLabel: UILabel!
     
     var review: Review!
+    var place: Place!
+    var postingUser: SnackUser?
     var name: String!
     var address: String!
     var currentUser = Auth.auth().currentUser
+    let dateFormatter = DateFormatter()
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -38,13 +42,17 @@ class ReviewTableViewController: UITableViewController {
         tap.cancelsTouchesInView = false
         self.view.addGestureRecognizer(tap)
         
-        if review != nil {
-            configureUserInterface()
-        } else {
-            // This is a new review
-            // Temporarily set reviewDocumentID to an empty string. We'll create an ID when saving the review in DeetailViewController
-            review = Review(reviewHeadline: "", reviewText: "", rating: 0, reviewBy: Auth.auth().currentUser?.uid ?? "", reviewDocumentID: "")
-            configureUserInterface()
+        // Set up DateFormatter
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .none
+        
+        if review == nil {
+            // Create new review by currentUser
+            review = Review(reviewBy: currentUser!.uid)
+        }
+        review.getPostedBy() { (postingUser) in
+            self.postingUser = postingUser
+            self.configureUserInterface()
         }
     }
     
@@ -53,6 +61,10 @@ class ReviewTableViewController: UITableViewController {
         reviewContentView.text = review.reviewText
         nameLabel.text = name
         addressLabel.text = address
+        
+        let formattedDate = dateFormatter.string(from: review.date)
+        reviewDateLabel.text = "posted: \(formattedDate)"
+        
         // update buttons
         for button in starButtonCollection {
             if button.tag <= review.rating {
@@ -61,17 +73,22 @@ class ReviewTableViewController: UITableViewController {
         }
         //TODO: - update below so instead of string, it compares against real UserID
         //If person viewing left the review, show save & cancel and get rid of the < button
-        if review.reviewBy == "\((currentUser?.uid)!)" {
+        if review.reviewBy == "\(currentUser!.uid)" {
+            // if the headline isn't blank, there must be a review, so "Save" button should read "Update"
             if review.reviewHeadline != "" {
                 saveBarButton.title = "Update"
-                deleteReviewButton.isHidden = true
+                deleteReviewButton.isHidden = false
             }
             self.navigationItem.leftItemsSupplementBackButton = false
             addBorder(view: reviewContentView, alpha: 1.0)
             addBorder(view: reviewTitleLabel, alpha: 1.0)
             addBorder(view: starBackgroundView, alpha: 1.0)
         } else { // hide save & cancel
-            reviewedByLabel.text = "review by: " + review.reviewBy
+            if postingUser != nil {
+                reviewedByLabel.text = "review by: " + postingUser!.email
+            } else {
+                reviewedByLabel.text = "review by: " + review.reviewBy
+            }
             self.saveBarButton.title = ""
             self.cancelBarButton.title = ""
             reviewTitleLabel.isUserInteractionEnabled = false
@@ -108,7 +125,6 @@ class ReviewTableViewController: UITableViewController {
         review.reviewText = reviewContentView.text!
     }
     
-    
     @IBAction func reviewTitleChanged(_ sender: UITextField) {
         enableDisableSaveButton()
     }
@@ -132,9 +148,5 @@ class ReviewTableViewController: UITableViewController {
             }
         }
         enableDisableSaveButton()
-    }
-    
-    @IBAction func deleteReviewPressed(_ sender: UIButton) {
-        
     }
 }
