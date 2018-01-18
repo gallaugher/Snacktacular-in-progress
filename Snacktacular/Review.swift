@@ -76,15 +76,56 @@ class Review {
     }
     
     func saveReview(place: Place){
-        let reviewRef = documentReference(leadingRef: place.documentReference())
-        let reviewToSave: [String: Any] = self.dictionary
-        reviewRef.setData(reviewToSave) { (error) in
+        let db = Firestore.firestore()
+        db.runTransaction({ (transaction, errorPointer) -> Any? in
+            // Read data from Firestore inside the transaction, so we don't accidentally
+            // update using stale client data. Error if we're unable to read here.
+            let placeSnapshot: DocumentSnapshot
+            do {
+                try placeSnapshot = transaction.getDocument(place.documentReference())
+            } catch let error as NSError {
+                errorPointer?.pointee = error
+                print("*** ERROR: in saveReview trying to get place documentReference: \(error.localizedDescription)")
+                return nil
+            }
+            
+            // Get latest place data in case something was recently updated.
+            // Save it in a separate tempPlace object so we keep our reference to the original place (which has a valid documentReference
+            let tempPlace = Place(dictionary: placeSnapshot.data())
+            
+            // Update the restaurant's rating and rating count and post the new review at the
+            // same time.
+            let newAverage = (Double(tempPlace.numberOfReviews) * tempPlace.averageRating + Double(self.rating))
+                / Double(tempPlace.numberOfReviews + 1)
+            place.averageRating = newAverage
+            place.numberOfReviews += 1
+            print(" >>> newAverage = \(place.averageRating)")
+            print(" >>> place.numberOfReviews = \(place.numberOfReviews)")
+            let reviewRef = self.documentReference(leadingRef: place.documentReference())
+            transaction.setData(self.dictionary, forDocument: reviewRef)
+            transaction.updateData([
+                "averageRating": place.averageRating,
+                "numberOfReviews": place.numberOfReviews
+                ], forDocument: place.documentReference())
+            return nil
+        }) { (object, error) in
             if let error = error {
-                print("ERROR: updating review \(error.localizedDescription)")
+                print("*** ERROR: problem executing transaction in review.saveReview. \(error.localizedDescription)")
             } else {
-                print("Review updated with reviewDocumentID \(self.reviewDocumentID)")
+                print("^^^ Looks like transaction save succeeded!")
             }
         }
+        
+//        // working single save
+//        let reviewRef = documentReference(leadingRef: place.documentReference())
+//        let reviewToSave: [String: Any] = self.dictionary
+//        reviewRef.setData(reviewToSave) { (error) in
+//            if let error = error {
+//                print("ERROR: updating review \(error.localizedDescription)")
+//            } else {
+//                print("Review updated with reviewDocumentID \(self.reviewDocumentID)")
+//            }
+//        }
     }
     
     func deleteReview(leadingRef: DocumentReference) {

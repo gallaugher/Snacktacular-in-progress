@@ -36,10 +36,10 @@ class PlaceDetailViewController: UIViewController {
                 averageRatingLabel.text = "-.-"
                 return
             }
-            let averageRating = Double(self.reviews.reduce(0, {$0 + $1.rating})) / Double(self.reviews.count)
-            
-            let ratingString = String(format: "%.1f", averageRating)
-            averageRatingLabel.text = ratingString
+//            let averageRating = Double(self.reviews.reduce(0, {$0 + $1.rating})) / Double(self.reviews.count)
+//
+//            let ratingString = String(format: "%.1f", place.averageRating)
+//            averageRatingLabel.text = ratingString
         }
     }
     
@@ -347,15 +347,19 @@ class PlaceDetailViewController: UIViewController {
         switch segue.identifier! {
         case "SaveUnwind":
             // If button said "Save" it was a new record, so change it to "Update" since we're about to save a place
-            if saveBarButtonItem.title != "" {
-                saveBarButtonItem.title = "Update"
+            place.saveData {
+                review.saveReview(place: self.place)
+                if self.saveBarButtonItem.title != "" {
+                    self.saveBarButtonItem.title = "Update"
+                }
             }
-            let placeRef = place.documentReference()
-            let reviewRef = review.documentReference(leadingRef: placeRef)
-            var dataToSave = [([String:Any], DocumentReference)]()
-            dataToSave.append((place.dictionary, placeRef))
-            dataToSave.append((review.dictionary, reviewRef))
-            batchSave(arrayToSave: dataToSave)
+            
+//            let placeRef = place.documentReference()
+//            let reviewRef = review.documentReference(leadingRef: placeRef)
+//            var dataToSave = [([String:Any], DocumentReference)]()
+//            dataToSave.append((place.dictionary, placeRef))
+//            dataToSave.append((review.dictionary, reviewRef))
+//            batchSave(arrayToSave: dataToSave)
         case "DeleteUnwind":
             review.deleteReview(leadingRef: place.documentReference())
 //            deleteReview(review: review)
@@ -663,6 +667,11 @@ extension PlaceDetailViewController {
                 let review = Review(dictionary: document.data())
                 review.reviewDocumentID = document.documentID
                 self.reviews.append(review)
+            }
+            if self.saveBarButtonItem.title != "Save" {
+                self.place.getAvgReview() { (avgReview) in
+                    self.averageRatingLabel.text = String(format: "%.1f", avgReview)
+                }
             }
             self.tableView.reloadData()
         }

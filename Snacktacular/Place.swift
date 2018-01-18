@@ -18,6 +18,7 @@ class Place: NSObject, MKAnnotation {
     var coordinate: CLLocationCoordinate2D
     var placeDocumentID: String
     var averageRating: Double
+    var numberOfReviews: Int
     
     var title: String? {
         return placeName
@@ -40,22 +41,23 @@ class Place: NSObject, MKAnnotation {
     }
     
     var dictionary: [String: Any] {
-        return ["placeName": placeName, "address": address, "postingUserID": postingUserID, "latitude": latitude, "longitude": longitude, "averageRating": averageRating]
+        return ["placeName": placeName, "address": address, "postingUserID": postingUserID, "latitude": latitude, "longitude": longitude, "averageRating": averageRating, "numberOfReviews": numberOfReviews]
     }
     
-    init(placeName: String, address: String, coordinate: CLLocationCoordinate2D, postingUserID: String, placeDocumentID: String, averageRating: Double) {
+    init(placeName: String, address: String, coordinate: CLLocationCoordinate2D, postingUserID: String, placeDocumentID: String, averageRating: Double, numberOfReviews: Int) {
         self.placeName = placeName
         self.address = address
         self.coordinate = coordinate
         self.postingUserID = postingUserID
         self.placeDocumentID = placeDocumentID
         self.averageRating = averageRating
+        self.numberOfReviews = numberOfReviews
     }
     
     convenience override init() {
         let db = Firestore.firestore()
         let placeDocRef = db.collection("places").document().documentID
-        self.init(placeName: "", address: "", coordinate: CLLocationCoordinate2D(), postingUserID: "", placeDocumentID: placeDocRef, averageRating: 0.0)
+        self.init(placeName: "", address: "", coordinate: CLLocationCoordinate2D(), postingUserID: "", placeDocumentID: placeDocRef, averageRating: 0.0, numberOfReviews: 0)
     }
     
     convenience init(dictionary: [String: Any]) {
@@ -66,7 +68,8 @@ class Place: NSObject, MKAnnotation {
         let longitude = dictionary["longitude"] as! CLLocationDegrees? ?? 0.0
         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         let averageRating = dictionary["averageRating"] as! Double? ?? 0.0
-        self.init(placeName: placeName, address: address, coordinate: coordinate, postingUserID: postingUserID, placeDocumentID: "", averageRating: averageRating)
+        let numberOfReviews = dictionary["numberOfReviews"] as! Int? ?? 0
+        self.init(placeName: placeName, address: address, coordinate: coordinate, postingUserID: postingUserID, placeDocumentID: "", averageRating: averageRating, numberOfReviews: numberOfReviews)
     }
     
     func documentReference() -> DocumentReference {
@@ -75,6 +78,22 @@ class Place: NSObject, MKAnnotation {
         // placeDocumentID was set during Place()
         placeRef = db.collection("places").document(self.placeDocumentID)
         return placeRef
+    }
+    
+    func getAvgReview(completed: @escaping (Double) -> ()) {
+        let db = Firestore.firestore()
+        var dictionary = [String: Any]()
+        let placeRef = db.collection("places").document(self.placeDocumentID)
+        placeRef.getDocument { (document, error) in
+            guard let document = document else {
+                print("*** ERROR: Document \(self.placeDocumentID) does not exist. \(error!.localizedDescription)")
+                return
+            }
+            if document.exists {
+                dictionary = document.data()
+            }
+            completed(dictionary["averageRating"] as! Double? ?? 0.0)
+        }
     }
     
     func saveData(completion: @escaping () -> ())  {
