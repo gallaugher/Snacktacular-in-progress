@@ -76,58 +76,12 @@ class Review {
     }
     
     func saveReview(place: Place){
-//
-//        let db = Firestore.firestore()
-//
-//
-//        // Create the dictionary representing data we want to save
-//        let dataToSave: [String: Any] = place.dictionary
-//
-//        // if we HAVE saved a record, we'll have an ID
-//        if place.placeDocumentID != "" {
-//            let ref = db.collection("places").document(place.placeDocumentID)
-//            ref.setData(dataToSave) { (error) in
-//                if let error = error {
-//                    print("ERROR: updating document \(error.localizedDescription)")
-//                } else {
-//                    print("Document updated with reference ID \(ref.documentID)")
-//                }
-//            }
-//        } else { // Otherwise we don't have a document ID so we need to create the ref ID and save a new document
-//            var ref: DocumentReference? = nil // Firestore will creat a new ID for us
-//            ref = db.collection("places").addDocument(data: dataToSave) { (error) in
-//                if let error = error {
-//                    print("ERROR: adding document \(error.localizedDescription)")
-//                } else {
-//                    place.placeDocumentID = "\(ref!.documentID)"
-//                }
-//            }
-//        }
-//
         
         let db = Firestore.firestore()
         db.runTransaction({ (transaction, errorPointer) -> Any? in
-            
-            // Read data from Firestore inside the transaction, so we don't accidentally
-            // update using stale client data. Error if we're unable to read here.
-            // let placeRef = place.documentReference()
-            
             let placeRef = db.collection("places").document(place.placeDocumentID)
-//            let placeSnapshot = try? transaction.getDocument(placeRef)
-
             transaction.setData(place.dictionary, forDocument: placeRef)
-//            do {
-//                // try placeSnapshot = transaction.getDocument(placeRef)
-//            } catch let error as NSError {
-//                errorPointer?.pointee = error
-//                print("*** ERROR: in updateReview trying to get place documentReference: \(error.localizedDescription)")
-//                return nil
-//            }
-            
-            // Get latest place data in case something was recently updated.
-            // Save it in a separate tempPlace object so we keep our reference to the original place (which has a valid documentReference
-//            let tempPlace = Place(dictionary: placeSnapshot.data())
-            
+
             // Update the restaurant's rating and rating count and post the new review at the
             // same time.
             let newAverage = (Double(place.numberOfReviews) * place.averageRating + Double(self.rating))
@@ -227,8 +181,12 @@ class Review {
             
             // Update the restaurant's rating and rating count and post the new review at the
             // same time.
-            let newAverage = (Double(tempPlace.numberOfReviews) * tempPlace.averageRating - Double(self.rating))
-                / Double(tempPlace.numberOfReviews - 1)
+            let newAverage: Double!
+            if tempPlace.numberOfReviews > 1 {
+                newAverage = (Double(tempPlace.numberOfReviews) * tempPlace.averageRating - Double(self.rating)) / Double(tempPlace.numberOfReviews - 1)
+            } else {
+                newAverage = 0.0 // avoid NaN for not a number when dividing by zero
+            }
             place.averageRating = newAverage
             place.numberOfReviews -= 1
             print(" >>> newAverage = \(place.averageRating)")

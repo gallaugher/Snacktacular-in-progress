@@ -687,7 +687,7 @@
                         <barButtonItem key="rightBarButtonItem" title="Save" id="XGg-dR-oNE">
                             <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <connections>
-                                <action selector="saveBarButtonPressed:" destination="OuT-Z1-ZFZ" id="nti-Nx-pb0"/>
+                                <segue destination="2WV-Sj-eGx" kind="unwind" identifier="SaveReviewUnwind" unwindAction="unwindFromReviewTableViewControllerWithSegue:" id="rXD-mQ-RTu"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -710,6 +710,7 @@
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6mg-Gt-Hbf" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="2WV-Sj-eGx" userLabel="Exit" sceneMemberID="exit"/>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="ZT0-ul-Tn0">
                     <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -862,7 +863,7 @@
                                                         <color key="titleColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </state>
                                                     <connections>
-                                                        <segue destination="3iY-se-bMV" kind="unwind" identifier="DeletePhoto" unwindAction="unwindFromPhotoViewControllerWithSegue:" id="b4T-I0-S7K"/>
+                                                        <action selector="deleteButtonPressed:" destination="wvs-Ka-ttV" eventType="touchUpInside" id="Wok-ES-Mtw"/>
                                                     </connections>
                                                 </button>
                                             </subviews>
@@ -884,13 +885,13 @@
                         <barButtonItem key="leftBarButtonItem" title="Cancel" id="wYV-fj-DDw">
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <connections>
-                                <segue destination="3iY-se-bMV" kind="unwind" identifier="CancelPhoto" unwindAction="unwindFromPhotoViewControllerWithSegue:" id="uwV-Dk-0FI"/>
+                                <action selector="cancelBarButtonPressed:" destination="wvs-Ka-ttV" id="gnq-vo-JkV"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" title="Save" id="7li-i7-Fdl">
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <connections>
-                                <segue destination="3iY-se-bMV" kind="unwind" identifier="SavePhoto" unwindAction="unwindFromPhotoViewControllerWithSegue:" id="xre-5m-08v"/>
+                                <segue destination="3iY-se-bMV" kind="unwind" identifier="SavePhotoUnwind" unwindAction="unwindFromPhotoTableViewControllerWithSegue:" id="e2Y-Wy-AGT"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

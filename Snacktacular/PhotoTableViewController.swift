@@ -18,6 +18,7 @@ class PhotoTableViewController: UITableViewController {
     @IBOutlet weak var cancelBarButton: UIBarButtonItem!
     @IBOutlet weak var saveBarButton: UIBarButtonItem!
     
+    var place: Place!
     var photo: Photo!
     var currentUser = Auth.auth().currentUser
     var postingUser: SnackUser?
@@ -29,6 +30,11 @@ class PhotoTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        guard place != nil else {
+            print("*** ERROR: for some reason place was nil when PhotoTableViewController loaded.")
+            return
+        }
         
         // These three lines will dismiss the keyboard when one taps outside of a textField
         let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
@@ -39,7 +45,7 @@ class PhotoTableViewController: UITableViewController {
         dateFormatter.dateStyle = .medium
         dateFormatter.timeStyle = .none
         
-        if photo == nil {
+        if photo == nil { // should not happen - we always pass in a photo value, or create a new one for "AddPhoto"
             // Create new review by currentUser
             photo = Photo(postedBy: currentUser!.uid)
         } else {
@@ -85,6 +91,9 @@ class PhotoTableViewController: UITableViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         photo.imageDescription = descriptionField.text!
+        if segue.identifier == "SavePhotoUnwind" {
+            photo.savePhoto(place: place)
+        }
     }
     
     func enableDisableSaveButton() {
@@ -95,8 +104,25 @@ class PhotoTableViewController: UITableViewController {
         }
     }
     
+    @IBAction func cancelBarButtonPressed(_ sender: UIBarButtonItem) {
+        let isPrestingInAddMode = presentingViewController is UINavigationController
+        if isPrestingInAddMode {
+            dismiss(animated: true, completion: nil)
+        } else {
+            navigationController?.popViewController(animated: true)
+        }
+    }
+    
     @IBAction func descriptionChanged(_ sender: UITextField) {
         enableDisableSaveButton()
+    }
+    
+
+    
+    @IBAction func deleteButtonPressed(_ sender: UIButton) {
+        photo.deletePhoto(place: place)
+        // Since we got here via Show segue (only way to display existing photo, which displays the "Delete" button):
+        navigationController?.popViewController(animated: true)
     }
     
 }

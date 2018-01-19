@@ -43,23 +43,30 @@ class Photo {
         self.init(image: UIImage(), imageDocumentID: "", imageDescription: "", postedBy: postedBy, date: Date())
     }
     
-    private func savePhotoRef(leadingRef: DocumentReference) {
-        // 1. What's the data we're going to save? photoToSave
-        // images are never updated, just saved or deleted, so no need to deal with updating.
-        let photoToSave = self.dictionary
-        // 2. Where are we going to save it? photoRef
-        let photoRef = leadingRef.collection("images").document(self.imageDocumentID)
-        // 3. Save it & check the result
-        photoRef.setData(photoToSave) { (error) in
+
+    
+    private func savePhotoRef(place: Place) {
+        let db = Firestore.firestore()
+        db.runTransaction({ (transaction, errorPointer) -> Any? in
+            let placeRef = db.collection("places").document(place.placeDocumentID)
+            
+            transaction.setData(place.dictionary, forDocument: placeRef)
+            // 2. Where are we going to save it? photoRef
+            let photoRef = placeRef.collection("images").document(self.imageDocumentID)
+            // 3. Save it & check the result
+            transaction.setData(self.dictionary, forDocument: photoRef)
+            return nil
+        }) { (object, error) in
             if let error = error {
-                print("ERROR: adding document \(error.localizedDescription)")
+                print("*** ERROR: problem executing transaction in review.saveReview. \(error.localizedDescription)")
             } else {
-                print("Document added for place \(leadingRef.documentID) and image \(photoRef.documentID)")
+                print("^^^ Looks like transaction save succeeded!")
             }
         }
     }
     
-    func savePhoto(leadingRef: DocumentReference) {
+    
+    func savePhoto(place: Place) {
         // Get a unique name for the Photo
         self.imageDocumentID = NSUUID().uuidString+".jpg" // always creates a unique string in part based on time/date
         // 1. What's the data we're going to save (to Storage)? photoData
@@ -70,7 +77,7 @@ class Photo {
         }
         // 2. Where are we going to save it (to Storage, not Firestore)? placeStorageRef
         let storage = Storage.storage()
-        let placeStorageRef = storage.reference().child(leadingRef.documentID)
+        let placeStorageRef = storage.reference().child(place.placeDocumentID)
         // Create a ref to the file you want to upload
         let photoStorageRef = placeStorageRef.child(self.imageDocumentID)
         // 3. Save it & check the result
@@ -78,7 +85,8 @@ class Photo {
             if let error = error {
                 print("*** ERROR: \(error.localizedDescription) saving image \(self.imageDocumentID) to StorageReference \(placeStorageRef).")
             }
-            self.savePhotoRef(leadingRef: leadingRef)
+            // Only run the ref saving transaction if we've successfully saved the photo.
+            self.savePhotoRef(place: place)
         }
     }
     
@@ -101,9 +109,8 @@ class Photo {
         }
     }
     
-    func deletePhoto(leadingRef: DocumentReference) {
-        let storage = Storage.storage()
-        let photoRef = leadingRef.collection("images").document(self.imageDocumentID)
+    private func deletePhotoRef(place: Place) {
+        let photoRef = place.documentReference().collection("images").document(self.imageDocumentID)
         photoRef.delete() { err in
             if let err = err {
                 print("Error removing document: \(self.imageDocumentID), error: \(err)")
@@ -111,13 +118,18 @@ class Photo {
                 print("^^^ Document \(self.imageDocumentID) successfully removed!")
             }
         }
-        let placeStorageRef = storage.reference().child(leadingRef.documentID).child(self.imageDocumentID)
+    }
+    
+    func deletePhoto(place: Place) {
+        let storage = Storage.storage()
+        let placeStorageRef = storage.reference().child(place.placeDocumentID).child(self.imageDocumentID)
         // Delete the file
         placeStorageRef.delete { error in
             if let error = error {
                 print("*** ERROR: \(error.localizedDescription) In deletePhoto trying to delete \(placeStorageRef)")
             } else {
                 print("Successfully deleted selected photo")
+                self.deletePhotoRef(place: place)
             }
         }
     }

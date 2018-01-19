@@ -25,8 +25,6 @@ class ReviewTableViewController: UITableViewController {
     var review: Review!
     var place: Place!
     var postingUser: SnackUser?
-//    var name: String!
-//    var address: String!
     var currentUser = Auth.auth().currentUser
     let dateFormatter = DateFormatter()
     var newReview = false
@@ -149,6 +147,20 @@ class ReviewTableViewController: UITableViewController {
         }
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        //Update review values that the user has entered or updated
+        review.reviewHeadline = reviewTitleLabel.text!
+        review.reviewText = reviewContentView.text!
+        
+        if segue.identifier == "SaveReviewUnwind" {
+            if newReview {
+                review.saveReview(place: place)
+            } else {
+                review.updateReview(place: place)
+            }
+        }
+    }
+    
     @IBAction func reviewTitleChanged(_ sender: UITextField) {
         enableDisableSaveButton()
     }
@@ -174,21 +186,17 @@ class ReviewTableViewController: UITableViewController {
         enableDisableSaveButton()
     }
     
-    @IBAction func saveBarButtonPressed(_ sender: UIBarButtonItem) {
-        //Update review values that the user has entered or updated
-        review.reviewHeadline = reviewTitleLabel.text!
-        review.reviewText = reviewContentView.text!
-        
-        if newReview {
-            review.saveReview(place: place)
-            // Since we got here via Present Modally segue (e.g. "Add" mode):
-            dismiss(animated: true, completion: nil)
-        } else {
-            review.updateReview(place: place)
-            // Since we got here via Show segue:
-            navigationController?.popViewController(animated: true)
-        }
-    }
+//    @IBAction func saveBarButtonPressed(_ sender: UIBarButtonItem) {
+//        //Update review values that the user has entered or updated
+//        review.reviewHeadline = reviewTitleLabel.text!
+//        review.reviewText = reviewContentView.text!
+//
+//        if newReview {
+//            review.saveReview(place: place)
+//        } else {
+//            review.updateReview(place: place)
+//        }
+//    }
     
     @IBAction func deleteReviewPressed(_ sender: UIButton) {
         review.deleteReview(place: place)

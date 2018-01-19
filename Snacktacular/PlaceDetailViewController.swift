@@ -36,10 +36,6 @@ class PlaceDetailViewController: UIViewController {
                 averageRatingLabel.text = "-.-"
                 return
             }
-//            let averageRating = Double(self.reviews.reduce(0, {$0 + $1.rating})) / Double(self.reviews.count)
-//
-//            let ratingString = String(format: "%.1f", place.averageRating)
-//            averageRatingLabel.text = ratingString
         }
     }
     
@@ -105,195 +101,6 @@ class PlaceDetailViewController: UIViewController {
         //        mapView.selectAnnotation(self.place!, animated: true)
     }
     
-//    func saveData(place: Place, review: Review?, photo: Photo?) {
-//        // Note: exissting place record will always be saved or updated each time an image or review is added.
-//
-//        let currentUser = Auth.auth().currentUser
-//
-//        // Grab the unique userID
-//        if let postingUserID = (currentUser?.uid) {
-//            place.postingUserID = postingUserID
-//        } else {
-//            place.postingUserID = "unknown user"
-//        }
-//
-//        // Create the dictionary representing data we want to save
-//        let dataToSave: [String: Any] = place.dictionary
-//
-//        // if we HAVE saved a record, we'll have an ID
-//        if place.placeDocumentID != "" {
-//            let ref = db.collection("places").document(place.placeDocumentID)
-//            ref.setData(dataToSave) { (error) in
-//                if let error = error {
-//                    print("ERROR: updating document \(error.localizedDescription)")
-//                } else {
-//                    print("Document updated with reference ID \(ref.documentID)")
-//                    if let photo = photo {
-//                        self.savePhoto(placeDocumentID: place.placeDocumentID, photo: photo)
-//                    }
-//                    if let review = review {
-//                        self.saveReview(review: review)
-//                    }
-//                }
-//            }
-//        } else { // Otherwise we don't have a document ID so we need to create the ref ID and save a new document
-//            var ref: DocumentReference? = nil // Firestore will creat a new ID for us
-//            ref = db.collection("places").addDocument(data: dataToSave) { (error) in
-//                if let error = error {
-//                    print("ERROR: adding document \(error.localizedDescription)")
-//                } else {
-//                    print("Document added with reference ID \(ref!.documentID)")
-//                    place.placeDocumentID = "\(ref!.documentID)"
-//                    self.saveBarButtonItem.title = "Update"
-//                    if let photo = photo {
-//                        self.savePhoto(placeDocumentID: place.placeDocumentID, photo: photo)
-//                    }
-//                    if let review = review {
-//                        self.saveReview(review: review)
-//                    }
-//                }
-//            }
-//        }
-//    }
-    
-    func updateAverageRating(){
-        var averageRating = 0.0
-        if reviews.count > 0 {
-            averageRating = Double(self.reviews.reduce(0, {$0 + $1.rating})) / Double(self.reviews.count)
-        }
-        db.collection("places").document((place?.placeDocumentID)!).updateData(["averageRating": averageRating]) { err in
-            if let err = err {
-                print("Error updating averageRating: \(err). ref \((self.place?.placeDocumentID)!)")
-            } else {
-                print("*** Updated average successfully updated")
-            }
-        }
-    }
-    
-//    func savePhoto(placeDocumentID: String, photo: Photo) {
-//        let photoName = NSUUID().uuidString+".jpg" // always creates a unique string in part based on time/date
-//        photo.imageDocumentID = photoName
-//        // Create the dictionary representing data we want to save
-//        // let reviewToSave: [String: Any] = review.dictionary
-//        let photoToSave: [String: Any] = photo.dictionary
-//
-//        // imagesRef now points to a bucket to hold all images for place named: "placeDocumentID"
-//        // let imagesRef = storage.reference().child(placeDocumentID)
-//        let placeStorageRef = storage.reference().child(placeDocumentID)
-//
-//        // Convert image to type Data so it can be saved to Storage
-//        guard let photoData = UIImageJPEGRepresentation(newImage, 0.8) else {
-//            print("ERROR creating imageData from JPEGRepresentation")
-//            return
-//        }
-//        // Create a ref to the file you want to upload
-//        let uploadedPhotoRef = placeStorageRef.child(photoName)
-//        let uploadTask = uploadedPhotoRef.putData(photoData, metadata: nil, completion: { (metadata, error) in
-//            guard error == nil else {
-//                print("ERROR: \(error!.localizedDescription)")
-//                return
-//            }
-//            let downloadURL = metadata!.downloadURL
-//            print("%%% successfully uploaded - the downloadURL is \(downloadURL)")
-//
-//            let photoRef = self.db.collection("places").document(placeDocumentID).collection("images").document(photoName)
-//
-//            photoRef.setData(photoToSave) { (error) in
-//                if let error = error {
-//                    print("ERROR: adding document \(error.localizedDescription)")
-//                } else {
-//                    print("Document added for place \(placeDocumentID) and image \(photoName)")
-//                    self.photos.append(photo)
-//                }
-//                self.collectionView.reloadData()
-//            }
-//        })
-//    }
-//
-//    func saveReview(review: Review){
-//        // Create the dictionary representing data we want to save
-//        let reviewToSave: [String: Any] = review.dictionary
-//
-//        // Just an error check. This should never happen
-//        guard let place = place else {
-//            print("*** ERROR: place was nil in saveReviewData")
-//            return
-//        }
-//
-//        // if we HAVE saved a review, we must be updating and we'll have an ID
-//        if review.reviewDocumentID != "" {
-//            let ref = db.collection("places").document(place.placeDocumentID).collection("reviews").document(review.reviewDocumentID)
-//            ref.setData(reviewToSave) { (error) in
-//                if let error = error {
-//                    print("ERROR: updating review \(error.localizedDescription)")
-//                } else {
-//                    print("Review updated with reviewDocumentID \(review.reviewDocumentID)")
-//                    self.updateAverageRating()
-//                }
-//            }
-//        } else { // Otherwise we don't have a document ID, so we must be adding a new review, so we need to create the ref ID and save a new review document
-//            var ref: DocumentReference? = nil // Firestore will creat a new ID for us
-//            ref = db.collection("places").document(place.placeDocumentID).collection("reviews").addDocument(data: reviewToSave) { (error) in
-//                if let error = error {
-//                    print("ERROR: adding document \(error.localizedDescription)")
-//                } else {
-//                    review.reviewDocumentID = "\(ref!.documentID)"
-//                    print("Document added for place \(place.placeDocumentID) and review \(review.reviewDocumentID)")
-//                    self.updateAverageRating()
-//                }
-//            }
-//        }
-//    }
-    
-//    func deletePhoto(photo: Photo) {
-//        guard let placeDocumentID = place?.placeDocumentID else {
-//            print("*** deletePhoto error, invalid placeDocumentID \((place?.placeDocumentID)!)")
-//            return
-//        }
-//
-//        let ref = db.collection("places").document((place?.placeDocumentID)!).collection("images").document(photo.imageDocumentID)
-//        ref.delete() { err in
-//            if let err = err {
-//                print("Error removing document: \(photo.imageDocumentID), error: \(err)")
-//            } else {
-//                print("^^^ Document \(photo.imageDocumentID) successfully removed!")
-//                guard let selectedIndex = self.collectionView.indexPathsForSelectedItems?.first else {
-//                    print("*** tried to delete invalid selection!")
-//                    return
-//                }
-//                self.photos.remove(at: selectedIndex.row)
-//                self.collectionView.deleteItems(at: [selectedIndex])
-//            }
-//        }
-//        let placeStorageRef = storage.reference().child(placeDocumentID).child(photo.imageDocumentID)
-//        // Delete the file
-//        placeStorageRef.delete { error in
-//            if let error = error {
-//                print("*** ERROR: \(error.localizedDescription) In deletePhoto trying to delete \(placeStorageRef)")
-//            } else {
-//                print("Successfully deleted selected photo")
-//            }
-//        }
-//    }
-    
-//    func deleteReview(review: Review) {
-//        let ref = db.collection("places").document((place?.placeDocumentID)!).collection("reviews").document(review.reviewDocumentID)
-//        ref.delete() { err in
-//            if let err = err {
-//                print("Error removing document: \(review.reviewDocumentID), error: \(err)")
-//            } else {
-//                print("^^^ Document \(review.reviewDocumentID) successfully removed!")
-//                guard let selectedIndex = self.tableView.indexPathForSelectedRow else {
-//                    print("*** tried to delete invalid selection!")
-//                    return
-//                }
-//                self.reviews.remove(at: selectedIndex.row)
-//                self.tableView.deleteRows(at: [selectedIndex], with: .fade)
-//                //                self.averageRating = Double(self.reviews.reduce(0, {$0 + $1.rating})) / Double(self.reviews.count)
-//            }
-//        }
-//    }
-    
     func centerMap(mapLocation: CLLocationCoordinate2D, regionRadius: CLLocationDistance) {
         let region = MKCoordinateRegionMakeWithDistance(mapLocation, regionRadius, regionRadius)
         mapView.setRegion(region, animated: true)
@@ -307,9 +114,11 @@ class PlaceDetailViewController: UIViewController {
             let navigationController = segue.destination as! UINavigationController
             let destination = navigationController.viewControllers.first as! PhotoTableViewController
             destination.photo = photo
+            destination.place = place
         case "ShowPhoto":
             let destination = segue.destination as! PhotoTableViewController
             destination.photo = photos[collectionView.indexPathsForSelectedItems!.first!.row]
+            destination.place = place
         // destination.photoImage = photos[collectionView.indexPathsForSelectedItems!.first!.row]
         case "ShowRatingSegue":
             print("*** showRatingSegue pressed!")
@@ -325,8 +134,6 @@ class PlaceDetailViewController: UIViewController {
             place.placeName = placeNameField.text!
             place.address = addressField.text!
             destination.place = place
-//            destination.name = placeNameField.text
-//            destination.address = addressField.text
             // do deselect here:
             if let selectedIndexPath = tableView.indexPathForSelectedRow {
                 tableView.deselectRow(at: selectedIndexPath, animated: true)
@@ -336,6 +143,40 @@ class PlaceDetailViewController: UIViewController {
             place?.address = addressField.text!
         default:
             print("DANG! This should not have happened! No case for the segue triggered! Inside PlaceDetailViewController.swift \(segue.identifier!)")
+        }
+    }
+    
+    @IBAction func unwindFromPhotoTableViewController(segue: UIStoryboardSegue) {
+        guard let source = segue.source as? PhotoTableViewController else {
+            print("Couldn't get valid source inside of unwindFromPhotoTableController")
+            return
+        }
+        guard source.photo != nil else {
+            print("ERROR: Problem passing back photo data")
+            return
+        }
+        if segue.identifier == "SavePhotoUnwind" {
+            // Must have pressed save, so if there is a "Save" button on the PlaceDetailTableView controller, it should be changed to "Update"
+            if saveBarButtonItem.title != "" { // It must say "Save"
+                saveBarButtonItem.title = "Update"
+            }
+        }
+    }
+    
+    @IBAction func unwindFromReviewTableViewController(segue: UIStoryboardSegue) {
+        guard let source = segue.source as? ReviewTableViewController else {
+            print("Couldn't get valid source inside of unwindFromReviewTableController")
+            return
+        }
+        guard source.review != nil else {
+            print("ERROR: Problem passing back review data")
+            return
+        }
+        if segue.identifier == "SaveReviewUnwind" {
+            // Must have pressed save, so if there is a "Save" button on the PlaceDetailTableView controller, it should be changed to "Update"
+            if saveBarButtonItem.title != "" { // It must say "Save"
+                saveBarButtonItem.title = "Update"
+            }
         }
     }
     
@@ -360,25 +201,25 @@ class PlaceDetailViewController: UIViewController {
 //        }
 //    }
     
-    @IBAction func unwindFromPhotoViewController(segue: UIStoryboardSegue) {
-        let source = segue.source as! PhotoTableViewController
-        switch segue.identifier! {
-        case "DeletePhoto":
-            source.photo.deletePhoto(leadingRef: place.documentReference())
-        case "SavePhoto":
-            if saveBarButtonItem.title != "" {
-                saveBarButtonItem.title = "Update"
-            }
-            place.saveData {
-                let placeRef = self.place.documentReference()
-                source.photo.savePhoto(leadingRef: placeRef)
-            }
-        case "CancelPhoto":
-            print("CancelPhoto pressed. Nothing to save")
-        default:
-            print("*** incorrectly landed on default case in unwindFromPhotoViewController")
-        }
-    }
+//    @IBAction func unwindFromPhotoViewController(segue: UIStoryboardSegue) {
+//        let source = segue.source as! PhotoTableViewController
+//        switch segue.identifier! {
+//        case "DeletePhoto":
+//            source.photo.deletePhoto(leadingRef: place.documentReference())
+//        case "SavePhoto":
+//            if saveBarButtonItem.title != "" {
+//                saveBarButtonItem.title = "Update"
+//            }
+////            place.saveData {
+////                let placeRef = self.place.documentReference()
+////                source.photo.savePhoto(leadingRef: placeRef)
+////            }
+//        case "CancelPhoto":
+//            print("CancelPhoto pressed. Nothing to save")
+//        default:
+//            print("*** incorrectly landed on default case in unwindFromPhotoViewController")
+//        }
+//    }
     
     func showAlert(title: String, message: String) {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -386,7 +227,6 @@ class PlaceDetailViewController: UIViewController {
         alertController.addAction(alertAction)
         present(alertController, animated: true, completion: nil)
     }
-    
     
     @IBAction func rateItTouchDown(_ sender: UIButton) {
         rateItButton.alpha = 0.5
@@ -661,10 +501,10 @@ extension PlaceDetailViewController {
                 self.reviews.append(review)
             }
             self.place.getAvgReview() { (avgReview) in
-                self.averageRatingLabel.text = String(format: "%.1f", avgReview)
-                // if we're getting reviews and "Save" isn't blank, we must have just posted a new review, so we can change "Save" to "Update"
-                if self.saveBarButtonItem.title != "" {
-                    self.saveBarButtonItem.title = "Update"
+                if avgReview == 0.0 {
+                    self.averageRatingLabel.text = "-.-" // for unrated
+                } else {
+                    self.averageRatingLabel.text = String(format: "%.1f", avgReview)
                 }
             }
             self.tableView.reloadData()
@@ -704,24 +544,13 @@ extension PlaceDetailViewController {
                     photo.imageDocumentID = document.documentID
                     self.photos.append(photo)
                 }
-                self.loadImages()
+                if let querySnapshot = querySnapshot, querySnapshot.count > 0 {
+                    self.loadImages()
+                } else { // no photos left
+                    self.collectionView.reloadData()
+                }
             }
         }
     }
-    
-    //func batchSave(itemsToSave: [ItemToSave]) {
-    func batchSave(arrayToSave: [([String:Any], DocumentReference)]) {
-        let db = Firestore.firestore()
-        let batch = db.batch()
-        for itemToSave in arrayToSave {
-            batch.setData(itemToSave.0, forDocument: itemToSave.1)
-        }
-        batch.commit() { err in
-            if let err = err {
-                print("&&& Error writing batch \(err)")
-            } else {
-                print("&&& Batch write succeeded.")
-            }
-        }
-    }
+
 }
