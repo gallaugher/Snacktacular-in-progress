@@ -25,10 +25,11 @@ class ReviewTableViewController: UITableViewController {
     var review: Review!
     var place: Place!
     var postingUser: SnackUser?
-    var name: String!
-    var address: String!
+//    var name: String!
+//    var address: String!
     var currentUser = Auth.auth().currentUser
     let dateFormatter = DateFormatter()
+    var newReview = false
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -42,13 +43,33 @@ class ReviewTableViewController: UITableViewController {
         tap.cancelsTouchesInView = false
         self.view.addGestureRecognizer(tap)
         
+        // Clear out all buttons in navigation bar, otherwise they'll flash a bit since configuration doesn't happen until after a Firestore call for review.getPostedBy()
+        self.saveBarButton.title = ""
+        self.cancelBarButton.title = ""
+        
         // Set up DateFormatter
         dateFormatter.dateStyle = .medium
         dateFormatter.timeStyle = .none
         
+        guard place != nil else {
+            print("*** ERROR: for some reason place was nil when ReviewTableViewController loaded.")
+            return
+        }
+        
         if review == nil {
+            newReview = true
+            // Hide the back button & show Save & Cancel
+            self.navigationItem.leftItemsSupplementBackButton = false
+            self.saveBarButton.title = "Save"
+            self.cancelBarButton.title = "Cancel"
             // Create new review by currentUser
             review = Review(reviewBy: currentUser!.uid)
+        } else {
+            if review.reviewBy == Auth.auth().currentUser?.uid {
+                self.navigationItem.leftItemsSupplementBackButton = false
+                self.saveBarButton.title = "Update"
+                self.cancelBarButton.title = "Cancel"
+            }
         }
         review.getPostedBy() { (postingUser) in
             self.postingUser = postingUser
@@ -59,8 +80,10 @@ class ReviewTableViewController: UITableViewController {
     func configureUserInterface() {
         reviewTitleLabel.text = review.reviewHeadline
         reviewContentView.text = review.reviewText
-        nameLabel.text = name
-        addressLabel.text = address
+        nameLabel.text = place.placeName
+        addressLabel.text = place.address
+//        nameLabel.text = name
+//        addressLabel.text = address
         
         let formattedDate = dateFormatter.string(from: review.date)
         reviewDateLabel.text = "posted: \(formattedDate)"
@@ -72,12 +95,17 @@ class ReviewTableViewController: UITableViewController {
             }
         }
         //TODO: - update below so instead of string, it compares against real UserID
-        //If person viewing left the review, show save & cancel and get rid of the < button
+        //If person viewing now also left the review, show save & cancel and get rid of the < button
         if review.reviewBy == "\(currentUser!.uid)" {
             // if the headline isn't blank, there must be a review, so "Save" button should read "Update"
-            if review.reviewHeadline != "" {
+            
+            self.cancelBarButton.title = "Cancel"
+            
+            if review.reviewHeadline != "" { // This must be an update since headline isn't blank
                 saveBarButton.title = "Update"
                 deleteReviewButton.isHidden = false
+            } else {
+                self.saveBarButton.title = "Save"
             }
             self.navigationItem.leftItemsSupplementBackButton = false
             addBorder(view: reviewContentView, alpha: 1.0)
@@ -91,6 +119,7 @@ class ReviewTableViewController: UITableViewController {
             }
             self.saveBarButton.title = ""
             self.cancelBarButton.title = ""
+            self.navigationItem.leftItemsSupplementBackButton = true
             reviewTitleLabel.isUserInteractionEnabled = false
             reviewContentView.isEditable = false
             reviewTitleLabel.backgroundColor = UIColor.clear
@@ -120,11 +149,6 @@ class ReviewTableViewController: UITableViewController {
         }
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        review.reviewHeadline = reviewTitleLabel.text!
-        review.reviewText = reviewContentView.text!
-    }
-    
     @IBAction func reviewTitleChanged(_ sender: UITextField) {
         enableDisableSaveButton()
     }
@@ -149,4 +173,27 @@ class ReviewTableViewController: UITableViewController {
         }
         enableDisableSaveButton()
     }
+    
+    @IBAction func saveBarButtonPressed(_ sender: UIBarButtonItem) {
+        //Update review values that the user has entered or updated
+        review.reviewHeadline = reviewTitleLabel.text!
+        review.reviewText = reviewContentView.text!
+        
+        if newReview {
+            review.saveReview(place: place)
+            // Since we got here via Present Modally segue (e.g. "Add" mode):
+            dismiss(animated: true, completion: nil)
+        } else {
+            review.updateReview(place: place)
+            // Since we got here via Show segue:
+            navigationController?.popViewController(animated: true)
+        }
+    }
+    
+    @IBAction func deleteReviewPressed(_ sender: UIButton) {
+        review.deleteReview(place: place)
+        // Since we got here via Show segue:
+        navigationController?.popViewController(animated: true)
+    }
+    
 }

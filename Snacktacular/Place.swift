@@ -57,7 +57,8 @@ class Place: NSObject, MKAnnotation {
     convenience override init() {
         let db = Firestore.firestore()
         let placeDocRef = db.collection("places").document().documentID
-        self.init(placeName: "", address: "", coordinate: CLLocationCoordinate2D(), postingUserID: "", placeDocumentID: placeDocRef, averageRating: 0.0, numberOfReviews: 0)
+        let postingUserID = Auth.auth().currentUser?.uid ?? ""
+        self.init(placeName: "", address: "", coordinate: CLLocationCoordinate2D(), postingUserID: postingUserID, placeDocumentID: placeDocRef, averageRating: 0.0, numberOfReviews: 0)
     }
     
     convenience init(dictionary: [String: Any]) {
@@ -67,16 +68,23 @@ class Place: NSObject, MKAnnotation {
         let latitude = dictionary["latitude"] as! CLLocationDegrees? ?? 0.0
         let longitude = dictionary["longitude"] as! CLLocationDegrees? ?? 0.0
         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        let placeDocumentID = dictionary["placeDocumentID"] as! String? ?? ""
         let averageRating = dictionary["averageRating"] as! Double? ?? 0.0
         let numberOfReviews = dictionary["numberOfReviews"] as! Int? ?? 0
-        self.init(placeName: placeName, address: address, coordinate: coordinate, postingUserID: postingUserID, placeDocumentID: "", averageRating: averageRating, numberOfReviews: numberOfReviews)
+        self.init(placeName: placeName, address: address, coordinate: coordinate, postingUserID: postingUserID, placeDocumentID: placeDocumentID, averageRating: averageRating, numberOfReviews: numberOfReviews)
     }
     
     func documentReference() -> DocumentReference {
         let db = Firestore.firestore()
         let placeRef: DocumentReference!
-        // placeDocumentID was set during Place()
+//         placeDocumentID was set during Place()
         placeRef = db.collection("places").document(self.placeDocumentID)
+//        if self.placeDocumentID == "" {
+//            placeRef = db.collection("places").document()
+//            self.placeDocumentID = placeRef.documentID
+//        } else { // otherwise get the ref for the existing review
+//            placeRef = db.collection("places").document(self.placeDocumentID)
+//        }
         return placeRef
     }
     

@@ -118,6 +118,8 @@
                         <outlet property="signOutBarButton" destination="iFM-KN-v2x" id="hoR-SJ-Fnf"/>
                         <outlet property="sortSegmentControl" destination="Z5N-xo-6uy" id="xXv-py-gkn"/>
                         <outlet property="tableView" destination="paC-ES-Lvt" id="ha7-Mj-xlD"/>
+                        <segue destination="UqV-Rs-zv8" kind="show" identifier="ShowSingleUser" id="Mbq-2x-0cY"/>
+                        <segue destination="V8W-bf-V6D" kind="show" identifier="ShowUsersTable" id="bla-9l-RVK"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -361,6 +363,7 @@
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" title="Save" id="pt3-OS-0kQ">
                             <connections>
+                                <action selector="saveBarButtonPressed:" destination="PtT-iT-zr9" id="DsC-1x-b4z"/>
                                 <segue destination="PtT-iT-zr9" kind="unwind" identifier="SaveFromPlaceDetail" unwindAction="unwindFromPlaceDetailWithSegue:" id="dbK-mb-K3y"/>
                             </connections>
                         </barButtonItem>
@@ -656,7 +659,7 @@
                                                         <color key="titleColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </state>
                                                     <connections>
-                                                        <segue destination="2WV-Sj-eGx" kind="unwind" identifier="DeleteUnwind" unwindAction="unwindFromReviewTableViewControllerWithSegue:" id="vBN-a4-sk0"/>
+                                                        <action selector="deleteReviewPressed:" destination="OuT-Z1-ZFZ" eventType="touchUpInside" id="Zod-3D-UBb"/>
                                                     </connections>
                                                 </button>
                                             </subviews>
@@ -684,7 +687,7 @@
                         <barButtonItem key="rightBarButtonItem" title="Save" id="XGg-dR-oNE">
                             <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <connections>
-                                <segue destination="2WV-Sj-eGx" kind="unwind" identifier="SaveUnwind" unwindAction="unwindFromReviewTableViewControllerWithSegue:" id="qW1-qC-dGj"/>
+                                <action selector="saveBarButtonPressed:" destination="OuT-Z1-ZFZ" id="nti-Nx-pb0"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -707,7 +710,6 @@
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6mg-Gt-Hbf" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <exit id="2WV-Sj-eGx" userLabel="Exit" sceneMemberID="exit"/>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="ZT0-ul-Tn0">
                     <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -933,6 +935,157 @@
             </objects>
             <point key="canvasLocation" x="-273" y="133"/>
         </scene>
+        <!--Users List View Controller-->
+        <scene sceneID="aY0-fZ-sw4">
+            <objects>
+                <viewController id="V8W-bf-V6D" customClass="UsersListViewController" customModule="Snacktacular" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="EVG-uh-hl9">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="8gv-om-cxY">
+                                <rect key="frame" x="0.0" y="88" width="375" height="641"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="UserCell" textLabel="yTd-qP-Dzn" detailTextLabel="xbW-lU-6hh" rowHeight="54" style="IBUITableViewCellStyleSubtitle" id="vcV-hu-o9r">
+                                        <rect key="frame" x="0.0" y="28" width="375" height="54"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="vcV-hu-o9r" id="iMs-Yv-dcV">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="53.666666666666664"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="yTd-qP-Dzn">
+                                                    <rect key="frame" x="15" y="5.9999999999999982" width="29" height="27.333333333333332"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <fontDescription key="fontDescription" name="AvenirNextCondensed-Regular" family="Avenir Next Condensed" pointSize="20"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Subtitle" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="xbW-lU-6hh">
+                                                    <rect key="frame" x="14.999999999999996" y="33.333333333333329" width="43.666666666666664" height="14.333333333333334"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <segue destination="UqV-Rs-zv8" kind="show" identifier="ShowSnackUser" id="PHm-je-mpp"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="COV-0F-tDh"/>
+                    </view>
+                    <connections>
+                        <outlet property="tableView" destination="8gv-om-cxY" id="6w2-yG-XOU"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="7Iv-ya-R1e" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-994.39999999999998" y="942.85714285714289"/>
+        </scene>
+        <!--User Profile View Controller-->
+        <scene sceneID="4mC-GB-lCj">
+            <objects>
+                <viewController id="UqV-Rs-zv8" customClass="UserProfileViewController" customModule="Snacktacular" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="TtU-mB-fus">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Snactacular User" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="azb-dC-Otp">
+                                <rect key="frame" x="16" y="122" width="343" height="33"/>
+                                <fontDescription key="fontDescription" name="AvenirNextCondensed-Regular" family="Avenir Next Condensed" pointSize="24"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Display Name:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0La-ND-Xrd">
+                                <rect key="frame" x="16" y="102" width="72" height="18"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="72" id="VHp-gu-gsX"/>
+                                    <constraint firstAttribute="height" constant="18" id="yZK-SV-em8"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="AvenirNextCondensed-DemiBold" family="Avenir Next Condensed" pointSize="13"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="snacky@snacktacular.com" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KWu-Ir-0oh">
+                                <rect key="frame" x="16" y="185" width="343" height="33"/>
+                                <fontDescription key="fontDescription" name="AvenirNextCondensed-Regular" family="Avenir Next Condensed" pointSize="24"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="E-Mail:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gn5-un-GPQ">
+                                <rect key="frame" x="16" y="165" width="35" height="18"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="18" id="7OU-fB-9JZ"/>
+                                    <constraint firstAttribute="width" constant="35" id="TUG-Xy-O0L"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="AvenirNextCondensed-DemiBold" family="Avenir Next Condensed" pointSize="13"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Member Since:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sLf-Xn-zzV">
+                                <rect key="frame" x="16" y="231" width="74" height="18"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="18" id="YZv-9f-LwS"/>
+                                    <constraint firstAttribute="width" constant="74" id="qec-9M-3S6"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="AvenirNextCondensed-DemiBold" family="Avenir Next Condensed" pointSize="13"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="vmp-9T-3ek">
+                                <rect key="frame" x="16" y="271" width="343" height="250"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="250" id="tCS-1S-aZh"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Dec. 32, 2016" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iAD-9a-GDE">
+                                <rect key="frame" x="94" y="225" width="265" height="33"/>
+                                <fontDescription key="fontDescription" name="AvenirNextCondensed-Regular" family="Avenir Next Condensed" pointSize="24"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="KWu-Ir-0oh" firstAttribute="leading" secondItem="ras-wx-WH6" secondAttribute="leading" constant="16" id="88f-96-Eve"/>
+                            <constraint firstItem="vmp-9T-3ek" firstAttribute="top" secondItem="iAD-9a-GDE" secondAttribute="bottom" constant="13" id="Azi-1w-RMT"/>
+                            <constraint firstItem="vmp-9T-3ek" firstAttribute="leading" secondItem="ras-wx-WH6" secondAttribute="leading" constant="16" id="BJb-Dp-5bF"/>
+                            <constraint firstItem="ras-wx-WH6" firstAttribute="trailing" secondItem="iAD-9a-GDE" secondAttribute="trailing" constant="16" id="EbQ-70-Tam"/>
+                            <constraint firstItem="iAD-9a-GDE" firstAttribute="leading" secondItem="sLf-Xn-zzV" secondAttribute="trailing" constant="4" id="FiZ-QH-MPs"/>
+                            <constraint firstItem="0La-ND-Xrd" firstAttribute="leading" secondItem="ras-wx-WH6" secondAttribute="leading" constant="16" id="FtF-sh-Upp"/>
+                            <constraint firstItem="ras-wx-WH6" firstAttribute="trailing" secondItem="KWu-Ir-0oh" secondAttribute="trailing" constant="16" id="MjX-nM-g5W"/>
+                            <constraint firstItem="sLf-Xn-zzV" firstAttribute="top" secondItem="KWu-Ir-0oh" secondAttribute="bottom" constant="13" id="STg-Dr-tkb"/>
+                            <constraint firstItem="0La-ND-Xrd" firstAttribute="top" secondItem="ras-wx-WH6" secondAttribute="top" constant="14" id="b5b-Y9-K9m"/>
+                            <constraint firstItem="ras-wx-WH6" firstAttribute="trailing" secondItem="azb-dC-Otp" secondAttribute="trailing" constant="16" id="bzM-oI-ss4"/>
+                            <constraint firstItem="gn5-un-GPQ" firstAttribute="top" secondItem="azb-dC-Otp" secondAttribute="bottom" constant="10" id="e37-Kp-xw0"/>
+                            <constraint firstItem="iAD-9a-GDE" firstAttribute="top" secondItem="KWu-Ir-0oh" secondAttribute="bottom" constant="7" id="eOM-r3-8sR"/>
+                            <constraint firstItem="azb-dC-Otp" firstAttribute="top" secondItem="0La-ND-Xrd" secondAttribute="bottom" constant="2" id="lRm-kC-1ea"/>
+                            <constraint firstItem="KWu-Ir-0oh" firstAttribute="top" secondItem="gn5-un-GPQ" secondAttribute="bottom" constant="2" id="qn9-u3-UKS"/>
+                            <constraint firstItem="azb-dC-Otp" firstAttribute="leading" secondItem="ras-wx-WH6" secondAttribute="leading" constant="16" id="s6h-HB-Nqv"/>
+                            <constraint firstItem="ras-wx-WH6" firstAttribute="trailing" secondItem="vmp-9T-3ek" secondAttribute="trailing" constant="16" id="vZg-H7-hfO"/>
+                            <constraint firstItem="sLf-Xn-zzV" firstAttribute="leading" secondItem="ras-wx-WH6" secondAttribute="leading" constant="16" id="vxI-i6-8ma"/>
+                            <constraint firstItem="gn5-un-GPQ" firstAttribute="leading" secondItem="ras-wx-WH6" secondAttribute="leading" constant="16" id="zUc-iV-fcb"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="ras-wx-WH6"/>
+                    </view>
+                    <connections>
+                        <outlet property="displayNameLabel" destination="azb-dC-Otp" id="3vD-R6-ASG"/>
+                        <outlet property="emailLabel" destination="KWu-Ir-0oh" id="Nf0-Me-G8z"/>
+                        <outlet property="memberSinceLabel" destination="iAD-9a-GDE" id="lEv-Mr-QYS"/>
+                        <outlet property="profileImage" destination="vmp-9T-3ek" id="ggc-fp-i7a"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="JBr-R8-lY2" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="432.80000000000001" y="942.85714285714289"/>
+        </scene>
         <!--Navigation Controller-->
         <scene sceneID="Dac-2T-WsK">
             <objects>
@@ -1010,6 +1163,7 @@
         <image name="star-highlighted" width="158" height="150"/>
     </resources>
     <inferredMetricsTieBreakers>
+        <segue reference="PHm-je-mpp"/>
         <segue reference="wYz-So-eu6"/>
         <segue reference="hla-xv-2jn"/>
         <segue reference="fHf-wQ-tua"/>

@@ -74,11 +74,11 @@ class PlaceListViewController: UIViewController {
     }
     
     @objc func singleUserPressed() {
-        print("*** Single User Bar Button Item Pressed!")
+        performSegue(withIdentifier: "ShowSingleUser", sender: nil)
     }
 
     @objc func usersPressed() {
-        print("*** Multiple Users Bar Button Item Pressed!")
+        performSegue(withIdentifier: "ShowUsersTable", sender: nil)
     }
     
     func signIn() {
@@ -135,14 +135,22 @@ class PlaceListViewController: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "ShowDetail" {
+        switch segue.identifier! {
+        case "ShowDetail":
             let destination = segue.destination as! PlaceDetailViewController
             let selectedRow = tableView.indexPathForSelectedRow!.row
             destination.place = places[selectedRow]
-        } else {
+        case "AddDetail":
             if let selectedIndexPath = tableView.indexPathForSelectedRow {
                 tableView.deselectRow(at: selectedIndexPath, animated: true)
             }
+        case "ShowSingleUser":
+            let destination = segue.destination as! UserProfileViewController
+            destination.snackUser = SnackUser(user: Auth.auth().currentUser!)
+        case "ShowUsersTable":
+            print("Nothing to do for segue ShowUsersTable")
+        default:
+            print("This should not have happened. Segue named \(segue.identifier!) not accounted for in PlaceListViewController's prepare(for segue:)")
         }
     }
     

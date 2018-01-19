@@ -12,6 +12,8 @@
 		3E3DC1AB1FFDB3BC0041F5A8 /* ReviewTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E3DC1AA1FFDB3BC0041F5A8 /* ReviewTableViewController.swift */; };
 		3E56F5D11FFC23B400435DD5 /* Review.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E56F5D01FFC23B400435DD5 /* Review.swift */; };
 		3E56F5D31FFC23ED00435DD5 /* ReviewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E56F5D21FFC23ED00435DD5 /* ReviewTableViewCell.swift */; };
+		3E574E912011482D00F3E422 /* UserProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E574E902011482D00F3E422 /* UserProfileViewController.swift */; };
+		3E574E9320114F3400F3E422 /* UsersListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E574E9220114F3400F3E422 /* UsersListViewController.swift */; };
 		3E5F569C1FC8F0690004CA4F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3E5F569B1FC8F0690004CA4F /* GoogleService-Info.plist */; };
 		3E6897FD1FD209B300541B68 /* PlaceImageCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6897FC1FD209B300541B68 /* PlaceImageCollectionViewCell.swift */; };
 		3E795C551FC88D7500258D81 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E795C541FC88D7500258D81 /* AppDelegate.swift */; };
@@ -36,6 +38,8 @@
 		3E3DC1AA1FFDB3BC0041F5A8 /* ReviewTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewTableViewController.swift; sourceTree = "<group>"; };
 		3E56F5D01FFC23B400435DD5 /* Review.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Review.swift; sourceTree = "<group>"; };
 		3E56F5D21FFC23ED00435DD5 /* ReviewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewTableViewCell.swift; sourceTree = "<group>"; };
+		3E574E902011482D00F3E422 /* UserProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileViewController.swift; sourceTree = "<group>"; };
+		3E574E9220114F3400F3E422 /* UsersListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsersListViewController.swift; sourceTree = "<group>"; };
 		3E5F569B1FC8F0690004CA4F /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
 		3E6897FC1FD209B300541B68 /* PlaceImageCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceImageCollectionViewCell.swift; sourceTree = "<group>"; };
 		3E795C511FC88D7500258D81 /* Snacktacular.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Snacktacular.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -104,6 +108,8 @@
 				3E6897FC1FD209B300541B68 /* PlaceImageCollectionViewCell.swift */,
 				3E7B46F1200AA8C4001F453D /* PhotoTableViewController.swift */,
 				3E3DC1AA1FFDB3BC0041F5A8 /* ReviewTableViewController.swift */,
+				3E574E902011482D00F3E422 /* UserProfileViewController.swift */,
+				3E574E9220114F3400F3E422 /* UsersListViewController.swift */,
 				3E795C581FC88D7500258D81 /* Main.storyboard */,
 				3E795C5B1FC88D7500258D81 /* Assets.xcassets */,
 				3E795C5D1FC88D7500258D81 /* LaunchScreen.storyboard */,
@@ -295,9 +301,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				3E9A51BF200953950086A15D /* Photo.swift in Sources */,
+				3E574E912011482D00F3E422 /* UserProfileViewController.swift in Sources */,
 				3E795C691FC88E9800258D81 /* PlaceListViewController.swift in Sources */,
 				3E56F5D11FFC23B400435DD5 /* Review.swift in Sources */,
 				3E795C551FC88D7500258D81 /* AppDelegate.swift in Sources */,
+				3E574E9320114F3400F3E422 /* UsersListViewController.swift in Sources */,
 				3EB7CA482001551000464B07 /* ActivityIndicatorView.swift in Sources */,
 				3E3DC1AB1FFDB3BC0041F5A8 /* ReviewTableViewController.swift in Sources */,
 				3EC161E5200D917F002C84BC /* SnackUser.swift in Sources */,

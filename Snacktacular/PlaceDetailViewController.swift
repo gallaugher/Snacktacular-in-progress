@@ -316,13 +316,17 @@ class PlaceDetailViewController: UIViewController {
             let destination = segue.destination as! ReviewTableViewController
             let selectedReview = tableView.indexPathForSelectedRow!.row
             destination.review = reviews[selectedReview]
-            destination.name = placeNameField.text
-            destination.address = addressField.text
+            place.placeName = placeNameField.text!
+            place.address = addressField.text!
+            destination.place = place
         case "AddRatingSegue":
             let navigationController = segue.destination as! UINavigationController
             let destination = navigationController.viewControllers.first as! ReviewTableViewController
-            destination.name = placeNameField.text
-            destination.address = addressField.text
+            place.placeName = placeNameField.text!
+            place.address = addressField.text!
+            destination.place = place
+//            destination.name = placeNameField.text
+//            destination.address = addressField.text
             // do deselect here:
             if let selectedIndexPath = tableView.indexPathForSelectedRow {
                 tableView.deselectRow(at: selectedIndexPath, animated: true)
@@ -335,38 +339,26 @@ class PlaceDetailViewController: UIViewController {
         }
     }
     
-    @IBAction func unwindFromReviewTableViewController(segue: UIStoryboardSegue) {
-        guard let source = segue.source as? ReviewTableViewController else {
-            print("Couldn't get valid source inside of unwindFromReviewTableController")
-            return
-        }
-        guard let review = source.review else {
-            print("ERROR: Problem passing back review data")
-            return
-        }
-        switch segue.identifier! {
-        case "SaveUnwind":
-            // If button said "Save" it was a new record, so change it to "Update" since we're about to save a place
-            place.saveData {
-                review.saveReview(place: self.place)
-                if self.saveBarButtonItem.title != "" {
-                    self.saveBarButtonItem.title = "Update"
-                }
-            }
-            
-//            let placeRef = place.documentReference()
-//            let reviewRef = review.documentReference(leadingRef: placeRef)
-//            var dataToSave = [([String:Any], DocumentReference)]()
-//            dataToSave.append((place.dictionary, placeRef))
-//            dataToSave.append((review.dictionary, reviewRef))
-//            batchSave(arrayToSave: dataToSave)
-        case "DeleteUnwind":
-            review.deleteReview(leadingRef: place.documentReference())
-//            deleteReview(review: review)
-        default:
-            print("ERROR: unidentified segue returning inside of unwindFromReview")
-        }
-    }
+//    @IBAction func unwindFromReviewTableViewController(segue: UIStoryboardSegue) {
+//        guard let source = segue.source as? ReviewTableViewController else {
+//            print("Couldn't get valid source inside of unwindFromReviewTableController")
+//            return
+//        }
+//        guard let review = source.review else {
+//            print("ERROR: Problem passing back review data")
+//            return
+//        }
+//        switch segue.identifier! {
+//        case "SaveUnwind":
+//            print"
+//
+//        case "DeleteUnwind":
+//            review.deleteReview(place: place)
+////            deleteReview(review: review)
+//        default:
+//            print("ERROR: unidentified segue returning inside of unwindFromReview")
+//        }
+//    }
     
     @IBAction func unwindFromPhotoViewController(segue: UIStoryboardSegue) {
         let source = segue.source as! PhotoTableViewController
@@ -668,9 +660,11 @@ extension PlaceDetailViewController {
                 review.reviewDocumentID = document.documentID
                 self.reviews.append(review)
             }
-            if self.saveBarButtonItem.title != "Save" {
-                self.place.getAvgReview() { (avgReview) in
-                    self.averageRatingLabel.text = String(format: "%.1f", avgReview)
+            self.place.getAvgReview() { (avgReview) in
+                self.averageRatingLabel.text = String(format: "%.1f", avgReview)
+                // if we're getting reviews and "Save" isn't blank, we must have just posted a new review, so we can change "Save" to "Update"
+                if self.saveBarButtonItem.title != "" {
+                    self.saveBarButtonItem.title = "Update"
                 }
             }
             self.tableView.reloadData()
