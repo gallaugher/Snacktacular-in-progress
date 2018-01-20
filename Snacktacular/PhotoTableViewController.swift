@@ -118,6 +118,9 @@ class PhotoTableViewController: UITableViewController {
     }
     
 
+    @IBAction func descriptionDoneKeyPressed(_ sender: UITextField) {
+        performSegue(withIdentifier: "SavePhotoUnwind", sender: sender)
+    }
     
     @IBAction func deleteButtonPressed(_ sender: UIButton) {
         photo.deletePhoto(place: place)

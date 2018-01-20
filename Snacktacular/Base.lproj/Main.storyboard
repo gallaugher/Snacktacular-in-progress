@@ -49,15 +49,15 @@
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Avg. Rating: 0.0" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qn9-Bb-G9m">
                                                     <rect key="frame" x="260" y="25" width="100" height="15"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Place Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IsO-xF-jAO">
                                                     <rect key="frame" x="15" y="4" width="345" height="21"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -218,29 +218,71 @@
                                             <color key="textColor" red="0.76015490293502808" green="0.15805926918983459" blue="0.10577357560396194" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eo3-e9-b7h">
-                                            <rect key="frame" x="287" y="352" width="80" height="26"/>
-                                            <color key="backgroundColor" red="0.92084521055221558" green="0.38111609220504761" blue="0.24304962158203125" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                            <constraints>
-                                                <constraint firstAttribute="height" constant="26" id="3Wf-CI-scY"/>
-                                                <constraint firstAttribute="width" constant="80" id="WGZ-On-GkQ"/>
-                                            </constraints>
-                                            <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
-                                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            <state key="normal" title="Rate It"/>
+                                        <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gWz-wd-0PJ" userLabel="Camera View">
+                                            <rect key="frame" x="178" y="352" width="94" height="26"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                                            <subviews>
+                                                <imageView contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="cameraIconWhitePDF" translatesAutoresizingMaskIntoConstraints="NO" id="dBQ-PU-SGc">
+                                                    <rect key="frame" x="8" y="4" width="26" height="18"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                </imageView>
+                                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sQ6-Us-tah">
+                                                    <rect key="frame" x="40" y="-3" width="46" height="32"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                                                    <state key="normal" title="Photo">
+                                                        <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    </state>
+                                                    <connections>
+                                                        <action selector="cameraViewPressed:" destination="W8l-r3-FEd" eventType="touchUpInside" id="Wyz-u7-CjB"/>
+                                                    </connections>
+                                                </button>
+                                            </subviews>
+                                            <color key="backgroundColor" red="0.92294818162918091" green="0.38277643918991089" blue="0.24308130145072937" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                             <connections>
-                                                <action selector="rateItTouchDown:" destination="W8l-r3-FEd" eventType="touchDown" id="wiR-he-zDy"/>
-                                                <action selector="ratePressed:" destination="W8l-r3-FEd" eventType="touchUpInside" id="F9e-0P-8g8"/>
-                                                <segue destination="QCP-aE-2ia" kind="presentation" identifier="AddRatingSegue" id="vYx-bM-fyk"/>
+                                                <outletCollection property="gestureRecognizers" destination="fHl-qq-XrJ" appends="YES" id="Ugj-xS-ET2"/>
                                             </connections>
+                                        </view>
+                                        <button hidden="YES" opaque="NO" contentMode="scaleAspectFit" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1jk-QO-ucZ">
+                                            <rect key="frame" x="122" y="350" width="41" height="28"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <state key="normal" image="cameraIconPDF"/>
                                         </button>
+                                        <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qhJ-Mj-QbG" userLabel="Review View">
+                                            <rect key="frame" x="280" y="352" width="91" height="26"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                                            <subviews>
+                                                <imageView contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="whiteStar" translatesAutoresizingMaskIntoConstraints="NO" id="yEe-7s-ES8">
+                                                    <rect key="frame" x="3" y="2" width="20" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                </imageView>
+                                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eo3-e9-b7h">
+                                                    <rect key="frame" x="21" y="0.0" width="70" height="26"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                                                    <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    <state key="normal" title="Review">
+                                                        <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    </state>
+                                                    <connections>
+                                                        <action selector="rateItTouchDown:" destination="W8l-r3-FEd" eventType="touchDown" id="wiR-he-zDy"/>
+                                                        <action selector="ratePressed:" destination="W8l-r3-FEd" eventType="touchUpInside" id="F9e-0P-8g8"/>
+                                                        <action selector="reviewViewPressed:" destination="W8l-r3-FEd" eventType="touchUpInside" id="zYA-12-Mwt"/>
+                                                        <segue destination="QCP-aE-2ia" kind="presentation" identifier="AddRatingSegue" id="vYx-bM-fyk"/>
+                                                    </connections>
+                                                </button>
+                                            </subviews>
+                                            <color key="backgroundColor" red="0.92294818160000003" green="0.38277643919999998" blue="0.24308130150000001" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                            <connections>
+                                                <outletCollection property="gestureRecognizers" destination="a9e-14-5uF" appends="YES" id="XcD-r8-vUX"/>
+                                            </connections>
+                                        </view>
                                     </subviews>
                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <constraints>
-                                        <constraint firstItem="eo3-e9-b7h" firstAttribute="top" secondItem="2RI-nn-sSh" secondAttribute="bottom" constant="8" id="3ah-2h-6l6"/>
                                         <constraint firstItem="PFE-v6-QEV" firstAttribute="top" secondItem="mzV-r3-wvi" secondAttribute="bottom" id="4VK-Aa-I0h"/>
                                         <constraint firstItem="IJj-q4-Ulw" firstAttribute="leading" secondItem="Wtl-Gd-upR" secondAttribute="leading" constant="8" id="5IV-37-3ZM"/>
-                                        <constraint firstAttribute="trailing" secondItem="eo3-e9-b7h" secondAttribute="trailing" constant="8" id="9Jw-nA-bVS"/>
                                         <constraint firstItem="XYf-9Q-lXk" firstAttribute="trailing" secondItem="2RI-nn-sSh" secondAttribute="trailing" id="CFA-8j-1JY"/>
                                         <constraint firstItem="XYf-9Q-lXk" firstAttribute="top" secondItem="PFE-v6-QEV" secondAttribute="bottom" constant="6" id="D22-MK-Wq5"/>
                                         <constraint firstItem="tBN-Z8-nMX" firstAttribute="top" secondItem="2RI-nn-sSh" secondAttribute="bottom" constant="11" id="Jfb-a4-xTJ"/>
@@ -333,7 +375,7 @@
                                 </prototypes>
                             </tableView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" red="0.92294818160000003" green="0.38277643919999998" blue="0.24308130150000001" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <constraints>
                             <constraint firstItem="e1q-32-q4Y" firstAttribute="top" secondItem="Jl6-Ku-ftL" secondAttribute="top" id="7Mu-OP-bdF"/>
                             <constraint firstItem="e1q-32-q4Y" firstAttribute="trailing" secondItem="Jl6-Ku-ftL" secondAttribute="trailing" id="7Pe-qL-EAy"/>
@@ -343,11 +385,6 @@
                         <viewLayoutGuide key="safeArea" id="Jl6-Ku-ftL"/>
                     </view>
                     <toolbarItems>
-                        <barButtonItem systemItem="camera" id="BVW-2t-7H8">
-                            <connections>
-                                <action selector="cameraButtonPressed:" destination="W8l-r3-FEd" id="Yt0-Yr-mlw"/>
-                            </connections>
-                        </barButtonItem>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="mrx-qO-8qN"/>
                         <barButtonItem title="Lookup Place" id="7Va-08-uow">
                             <connections>
@@ -373,15 +410,29 @@
                         <outlet property="averageRatingLabel" destination="tBN-Z8-nMX" id="gYT-rj-WzT"/>
                         <outlet property="cancelBarButtonItem" destination="fQq-Bo-8rW" id="uei-Ax-emJ"/>
                         <outlet property="collectionView" destination="2RI-nn-sSh" id="MvA-n9-YZz"/>
+                        <outlet property="lookupPlaceButton" destination="7Va-08-uow" id="vwP-HI-V2A"/>
                         <outlet property="mapView" destination="XYf-9Q-lXk" id="rfl-e3-RUB"/>
                         <outlet property="placeNameField" destination="mzV-r3-wvi" id="9dh-h4-Vhq"/>
                         <outlet property="rateItButton" destination="eo3-e9-b7h" id="lKs-Wh-Vyg"/>
                         <outlet property="saveBarButtonItem" destination="pt3-OS-0kQ" id="4m9-Pu-Bts"/>
                         <outlet property="tableView" destination="e1q-32-q4Y" id="Cq8-XV-kU4"/>
                         <segue destination="Zw9-i0-7e4" kind="presentation" identifier="AddPhoto" id="m2e-KX-pV2"/>
+                        <segue destination="QCP-aE-2ia" kind="presentation" identifier="AddReviewSegue" id="Plb-mm-FBV"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="I16-hT-ifv" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="a9e-14-5uF" userLabel="Review Tap Gesture Recognizer">
+                    <connections>
+                        <action selector="reviewViewPressed:" destination="W8l-r3-FEd" id="uub-Cd-Wg0"/>
+                        <outlet property="delegate" destination="qhJ-Mj-QbG" id="ZoO-6p-emd"/>
+                    </connections>
+                </tapGestureRecognizer>
+                <tapGestureRecognizer id="fHl-qq-XrJ" userLabel="Camera Tap Gesture Recognizer">
+                    <connections>
+                        <action selector="cameraViewPressed:" destination="W8l-r3-FEd" id="BYd-Nb-WMJ"/>
+                        <outlet property="delegate" destination="gWz-wd-0PJ" id="xjy-UO-7Gv"/>
+                    </connections>
+                </tapGestureRecognizer>
                 <exit id="PtT-iT-zr9" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="2512.8000000000002" y="131.52709359605913"/>
@@ -698,7 +749,7 @@
                         <outlet property="nameLabel" destination="Oi2-hK-aVy" id="fdk-yc-gqK"/>
                         <outlet property="reviewContentView" destination="Q6L-V9-UEw" id="yPS-Bk-f6m"/>
                         <outlet property="reviewDateLabel" destination="qhI-je-wG6" id="x0x-li-JJW"/>
-                        <outlet property="reviewTitleLabel" destination="aYn-RS-FMv" id="t4i-yZ-hk9"/>
+                        <outlet property="reviewTitleField" destination="aYn-RS-FMv" id="t4i-yZ-hk9"/>
                         <outlet property="reviewedByLabel" destination="P5n-nY-azM" id="tTh-PR-MZe"/>
                         <outlet property="saveBarButton" destination="XGg-dR-oNE" id="p17-pO-qbp"/>
                         <outlet property="starBackgroundView" destination="M01-Hl-W6R" id="6wZ-KG-mbV"/>
@@ -762,9 +813,13 @@
                                                     </constraints>
                                                     <nil key="textColor"/>
                                                     <fontDescription key="fontDescription" name="AvenirNextCondensed-Regular" family="Avenir Next Condensed" pointSize="24"/>
-                                                    <textInputTraits key="textInputTraits"/>
+                                                    <textInputTraits key="textInputTraits" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                                     <connections>
                                                         <action selector="descriptionChanged:" destination="wvs-Ka-ttV" eventType="editingChanged" id="dGW-30-OYg"/>
+                                                        <action selector="descriptionDoneKeyPressed:" destination="wvs-Ka-ttV" eventType="primaryActionTriggered" id="XoS-OO-U8G"/>
+                                                        <action selector="doneKeyPressed:" destination="3iY-se-bMV" eventType="editingDidEnd" id="JsZ-F2-9py"/>
+                                                        <action selector="reviewDoneKeyPressed:" destination="3iY-se-bMV" eventType="primaryActionTriggered" id="bue-Sf-ihy"/>
+                                                        <action selector="reviewDonePressed:" destination="3iY-se-bMV" eventType="primaryActionTriggered" id="o7g-yL-vRk"/>
                                                     </connections>
                                                 </textField>
                                             </subviews>
@@ -1150,6 +1205,9 @@
                         </textAttributes>
                     </navigationBar>
                     <nil name="viewControllers"/>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="gLg-N8-dSY">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
                     <connections>
                         <segue destination="wvs-Ka-ttV" kind="relationship" relationship="rootViewController" id="Lm9-u0-qlB"/>
                     </connections>
@@ -1160,12 +1218,16 @@
         </scene>
     </scenes>
     <resources>
+        <image name="cameraIconPDF" width="127" height="90"/>
+        <image name="cameraIconWhitePDF" width="127" height="90"/>
         <image name="star-empty" width="158" height="150"/>
         <image name="star-highlighted" width="158" height="150"/>
+        <image name="whiteStar" width="105" height="100"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="PHm-je-mpp"/>
-        <segue reference="wYz-So-eu6"/>
+        <segue reference="Plb-mm-FBV"/>
+        <segue reference="Mbq-2x-0cY"/>
+        <segue reference="Lm9-u0-qlB"/>
         <segue reference="hla-xv-2jn"/>
         <segue reference="fHf-wQ-tua"/>
     </inferredMetricsTieBreakers>

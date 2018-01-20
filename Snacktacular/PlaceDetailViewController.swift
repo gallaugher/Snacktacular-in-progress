@@ -22,6 +22,7 @@ class PlaceDetailViewController: UIViewController {
     @IBOutlet weak var saveBarButtonItem: UIBarButtonItem!
     @IBOutlet weak var cancelBarButtonItem: UIBarButtonItem!
     @IBOutlet weak var averageRatingLabel: UILabel!
+    @IBOutlet weak var lookupPlaceButton: UIBarButtonItem!
     
     var place: Place!
     var locationManger: CLLocationManager!
@@ -77,9 +78,12 @@ class PlaceDetailViewController: UIViewController {
             //            mapView.addAnnotation(place)
             //            mapView.selectAnnotation(place, animated: true)
             
-            // blank out Cancel and Save buttons
+            // blank out Cancel, Save, and Lookup buttons
             saveBarButtonItem.title = ""
             cancelBarButtonItem.title = ""
+            navigationController?.setToolbarHidden(true, animated: false)
+//            lookupPlaceButton.title = ""
+//            lookupPlaceButton.isEnabled = false
             placeNameField.isEnabled = false
             addressField.isEnabled = false
         }
@@ -129,6 +133,16 @@ class PlaceDetailViewController: UIViewController {
             place.address = addressField.text!
             destination.place = place
         case "AddRatingSegue":
+            let navigationController = segue.destination as! UINavigationController
+            let destination = navigationController.viewControllers.first as! ReviewTableViewController
+            place.placeName = placeNameField.text!
+            place.address = addressField.text!
+            destination.place = place
+            // do deselect here:
+            if let selectedIndexPath = tableView.indexPathForSelectedRow {
+                tableView.deselectRow(at: selectedIndexPath, animated: true)
+            }
+        case "AddReviewSegue":
             let navigationController = segue.destination as! UINavigationController
             let destination = navigationController.viewControllers.first as! ReviewTableViewController
             place.placeName = placeNameField.text!
@@ -236,6 +250,29 @@ class PlaceDetailViewController: UIViewController {
         rateItButton.alpha = 1.0     
     }
     
+    @IBAction func reviewButtonPressed(_ sender: UIBarButtonItem) {
+        rateItButton.alpha = 1.0  
+    }
+    
+    @IBAction func reviewViewPressed(_ sender: Any) {
+        performSegue(withIdentifier: "AddReviewSegue", sender: nil)
+    }
+    
+    @IBAction func cameraViewPressed(_ sender: Any) {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        let cameraAction = UIAlertAction(title: "Camera", style: .default) { (cameraAction) in
+            self.accessCamera()
+        }
+        let libraryAction = UIAlertAction(title: "Photo Library", style: .default) { (libraryAction) in
+            self.accessLibrary()
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alertController.addAction(cameraAction)
+        alertController.addAction(libraryAction)
+        alertController.addAction(cancelAction)
+        present(alertController, animated: true, completion: nil)
+    }
+    
     @IBAction func cancelButtonPressed(_ sender: Any) {
         let isPrestingInAddMode = presentingViewController is UINavigationController
         if isPrestingInAddMode {
@@ -251,20 +288,36 @@ class PlaceDetailViewController: UIViewController {
         present(autocompleteController, animated: true, completion: nil)
     }
     
-    @IBAction func cameraButtonPressed(_ sender: UIBarButtonItem) {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        let cameraAction = UIAlertAction(title: "Camera", style: .default) { (cameraAction) in
-            self.accessCamera()
-        }
-        let libraryAction = UIAlertAction(title: "Photo Library", style: .default) { (libraryAction) in
-            self.accessLibrary()
-        }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        alertController.addAction(cameraAction)
-        alertController.addAction(libraryAction)
-        alertController.addAction(cancelAction)
-        present(alertController, animated: true, completion: nil)
-    }
+//    @IBAction func cameraBarButtonPressed(_ sender: UIBarButtonItem) {
+//        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+//        let cameraAction = UIAlertAction(title: "Camera", style: .default) { (cameraAction) in
+//            self.accessCamera()
+//        }
+//        let libraryAction = UIAlertAction(title: "Photo Library", style: .default) { (libraryAction) in
+//            self.accessLibrary()
+//        }
+//        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+//        alertController.addAction(cameraAction)
+//        alertController.addAction(libraryAction)
+//        alertController.addAction(cancelAction)
+//        present(alertController, animated: true, completion: nil)
+//    }
+//    
+//    @IBAction func cameraButtonPressed(_ sender: UIButton) {
+//        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+//        let cameraAction = UIAlertAction(title: "Camera", style: .default) { (cameraAction) in
+//            self.accessCamera()
+//        }
+//        let libraryAction = UIAlertAction(title: "Photo Library", style: .default) { (libraryAction) in
+//            self.accessLibrary()
+//        }
+//        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+//        alertController.addAction(cameraAction)
+//        alertController.addAction(libraryAction)
+//        alertController.addAction(cancelAction)
+//        present(alertController, animated: true, completion: nil)
+//    }
+    
 }
 
 extension PlaceDetailViewController: CLLocationManagerDelegate {

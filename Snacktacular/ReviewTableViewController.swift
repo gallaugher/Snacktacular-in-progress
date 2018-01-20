@@ -13,7 +13,7 @@ class ReviewTableViewController: UITableViewController {
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var addressLabel: UILabel!
     @IBOutlet weak var reviewContentView: UITextView!
-    @IBOutlet weak var reviewTitleLabel: UITextField!
+    @IBOutlet weak var reviewTitleField: UITextField!
     @IBOutlet var starButtonCollection: [UIButton]!
     @IBOutlet weak var cancelBarButton: UIBarButtonItem!
     @IBOutlet weak var saveBarButton: UIBarButtonItem!
@@ -76,7 +76,7 @@ class ReviewTableViewController: UITableViewController {
     }
     
     func configureUserInterface() {
-        reviewTitleLabel.text = review.reviewHeadline
+        reviewTitleField.text = review.reviewHeadline
         reviewContentView.text = review.reviewText
         nameLabel.text = place.placeName
         addressLabel.text = place.address
@@ -107,7 +107,7 @@ class ReviewTableViewController: UITableViewController {
             }
             self.navigationItem.leftItemsSupplementBackButton = false
             addBorder(view: reviewContentView, alpha: 1.0)
-            addBorder(view: reviewTitleLabel, alpha: 1.0)
+            addBorder(view: reviewTitleField, alpha: 1.0)
             addBorder(view: starBackgroundView, alpha: 1.0)
         } else { // hide save & cancel
             if postingUser != nil {
@@ -118,10 +118,10 @@ class ReviewTableViewController: UITableViewController {
             self.saveBarButton.title = ""
             self.cancelBarButton.title = ""
             self.navigationItem.leftItemsSupplementBackButton = true
-            reviewTitleLabel.isUserInteractionEnabled = false
+            reviewTitleField.isUserInteractionEnabled = false
             reviewContentView.isEditable = false
-            reviewTitleLabel.backgroundColor = UIColor.clear
-            reviewTitleLabel.borderStyle = UITextBorderStyle.none
+            reviewTitleField.backgroundColor = UIColor.clear
+            reviewTitleField.borderStyle = UITextBorderStyle.none
             reviewContentView.backgroundColor = UIColor.clear
             starBackgroundView.backgroundColor = UIColor.clear
             for button in starButtonCollection {
@@ -140,7 +140,7 @@ class ReviewTableViewController: UITableViewController {
     }
     
     func enableDisableSaveButton() {
-        if reviewTitleLabel.text != "" && review.rating > 0 {
+        if reviewTitleField.text != "" && review.rating > 0 {
             saveBarButton.isEnabled = true
         } else {
             saveBarButton.isEnabled = false
@@ -149,7 +149,7 @@ class ReviewTableViewController: UITableViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         //Update review values that the user has entered or updated
-        review.reviewHeadline = reviewTitleLabel.text!
+        review.reviewHeadline = reviewTitleField.text!
         review.reviewText = reviewContentView.text!
         
         if segue.identifier == "SaveReviewUnwind" {
@@ -164,6 +164,7 @@ class ReviewTableViewController: UITableViewController {
     @IBAction func reviewTitleChanged(_ sender: UITextField) {
         enableDisableSaveButton()
     }
+    
     
     @IBAction func cancelButtonPressed(_ sender: UIBarButtonItem) {
         let isPrestingInAddMode = presentingViewController is UINavigationController
@@ -185,18 +186,6 @@ class ReviewTableViewController: UITableViewController {
         }
         enableDisableSaveButton()
     }
-    
-//    @IBAction func saveBarButtonPressed(_ sender: UIBarButtonItem) {
-//        //Update review values that the user has entered or updated
-//        review.reviewHeadline = reviewTitleLabel.text!
-//        review.reviewText = reviewContentView.text!
-//
-//        if newReview {
-//            review.saveReview(place: place)
-//        } else {
-//            review.updateReview(place: place)
-//        }
-//    }
     
     @IBAction func deleteReviewPressed(_ sender: UIButton) {
         review.deleteReview(place: place)
