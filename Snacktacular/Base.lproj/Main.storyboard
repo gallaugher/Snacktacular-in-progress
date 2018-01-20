@@ -73,7 +73,7 @@
                                 </prototypes>
                             </tableView>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" red="0.92294818160000003" green="0.38277643919999998" blue="0.24308130150000001" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <constraints>
                             <constraint firstItem="paC-ES-Lvt" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="5Oi-v9-6u3"/>
                             <constraint firstItem="paC-ES-Lvt" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="6WH-Iy-LlZ"/>
@@ -728,6 +728,7 @@
                             <outlet property="delegate" destination="OuT-Z1-ZFZ" id="cfd-ZL-hXl"/>
                         </connections>
                     </tableView>
+                    <extendedEdge key="edgesForExtendedLayout" top="YES"/>
                     <navigationItem key="navigationItem" leftItemsSupplementBackButton="YES" id="8dw-Rc-EJD">
                         <barButtonItem key="leftBarButtonItem" title="Cancel" id="jUT-oR-dtc">
                             <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -807,7 +808,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="enter photo description" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="F5w-1O-1gT">
-                                                    <rect key="frame" x="5" y="6" width="365" height="30"/>
+                                                    <rect key="frame" x="5" y="7" width="365" height="30"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="30" id="abS-K9-3lT"/>
                                                     </constraints>
@@ -936,6 +937,7 @@
                             <outlet property="delegate" destination="wvs-Ka-ttV" id="BXX-RP-miZ"/>
                         </connections>
                     </tableView>
+                    <extendedEdge key="edgesForExtendedLayout" top="YES"/>
                     <navigationItem key="navigationItem" leftItemsSupplementBackButton="YES" id="d1e-ZF-63V">
                         <barButtonItem key="leftBarButtonItem" title="Cancel" id="wYV-fj-DDw">
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1228,7 +1230,7 @@
         <segue reference="Plb-mm-FBV"/>
         <segue reference="Mbq-2x-0cY"/>
         <segue reference="Lm9-u0-qlB"/>
-        <segue reference="hla-xv-2jn"/>
+        <segue reference="2Yk-aP-c8g"/>
         <segue reference="fHf-wQ-tua"/>
     </inferredMetricsTieBreakers>
 </document>

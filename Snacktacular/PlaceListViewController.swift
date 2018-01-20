@@ -32,6 +32,7 @@ class PlaceListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
         configureLeftBarButtonItems() // needed to create smaller space
         db = Firestore.firestore()
         storage = Storage.storage()
@@ -45,6 +46,8 @@ class PlaceListViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.setToolbarHidden(false, animated: false)
+        
         checkForUpdates()
     }
     

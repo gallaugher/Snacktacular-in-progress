@@ -28,6 +28,7 @@ class ReviewTableViewController: UITableViewController {
     var currentUser = Auth.auth().currentUser
     let dateFormatter = DateFormatter()
     var newReview = false
+    var bottomBarView: UIView!
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -40,6 +41,9 @@ class ReviewTableViewController: UITableViewController {
         let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
         tap.cancelsTouchesInView = false
         self.view.addGestureRecognizer(tap)
+        
+
+        //self.view.backgroundColor = UIColor(red: 235, green: 76, blue: 42, alpha: 1.0)
         
         // Clear out all buttons in navigation bar, otherwise they'll flash a bit since configuration doesn't happen until after a Firestore call for review.getPostedBy()
         self.saveBarButton.title = ""
@@ -73,6 +77,16 @@ class ReviewTableViewController: UITableViewController {
             self.postingUser = postingUser
             self.configureUserInterface()
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+            super.viewWillAppear(animated)
+
+                bottomBarView = UIView(frame: CGRect(x: 0, y: self.tableView.bounds.size.height - 34, width: self.tableView.bounds.size.width, height: 34))
+        self.tableView.backgroundColor = UIColor(red: 235, green: 76, blue: 42, alpha: 1.0)
+        bottomBarView!.backgroundColor = UIColor(red: 235, green: 76, blue: 42, alpha: 1.0)
+               // bottomX!.backgroundColor = self.tableView.backgroundColor
+                self.navigationController?.view.addSubview(bottomBarView!)
     }
     
     func configureUserInterface() {
